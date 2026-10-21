@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Tech Toolkit</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --panel2:#f0f2f5; --text:#1b1f24; --muted:#5d6673; --line:#dde1e6;
+  --accent:#0b6bcb; --accent-soft:#e3effb; --code-bg:#0f1720; --code-text:#d7e1ea; --code-comment:#7d8b99;
+  --var-bg:#f2c94c; --var-text:#1b1f24; --warn:#b54708; --warn-soft:#fef0c7; --danger:#b42318; --danger-soft:#fee4e2;
+  --ok:#067647; --ok-soft:#dcfae6; --purple:#6941c6; --purple-soft:#f4ebff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c232c; --text:#e6edf3; --muted:#8d99a6; --line:#2a323c;
+    --accent:#4c9be8; --accent-soft:#16283d; --code-bg:#0a0e14; --code-text:#d7e1ea; --code-comment:#6e7b88;
+    --var-bg:#d9b13b; --var-text:#111; --warn:#f5a454; --warn-soft:#3a2710; --danger:#f97066; --danger-soft:#3d1512;
+    --ok:#47cd89; --ok-soft:#0f2e1f; --purple:#b692f6; --purple-soft:#2a1d45;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c232c; --text:#e6edf3; --muted:#8d99a6; --line:#2a323c;
+  --accent:#4c9be8; --accent-soft:#16283d; --code-bg:#0a0e14; --code-text:#d7e1ea; --code-comment:#6e7b88;
+  --var-bg:#d9b13b; --var-text:#111; --warn:#f5a454; --warn-soft:#3a2710; --danger:#f97066; --danger-soft:#3d1512;
+  --ok:#47cd89; --ok-soft:#0f2e1f; --purple:#b692f6; --purple-soft:#2a1d45;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+.mono,code,pre{font-family:"Cascadia Mono","Cascadia Code",Consolas,"Courier New",monospace}
+
+header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;white-space:nowrap}
+.brand .logo{width:28px;height:28px;border-radius:7px;background:var(--code-bg);color:#5ee1a0;display:grid;place-items:center;font-family:Consolas,monospace;font-size:13px;font-weight:700}
+.search{flex:1;position:relative;max-width:620px}
+.search input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);outline:none}
+.search input:focus{border-color:var(--accent);background:var(--panel)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.55}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--muted)}
+.iconbtn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.iconbtn:hover{border-color:var(--accent)}
+
+.varbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 18px 10px;border-top:1px solid var(--line);background:var(--panel2)}
+.varbar .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.var-field{display:flex;align-items:center;gap:6px}
+.var-field label{font-size:12px;color:var(--muted)}
+.var-field input{width:150px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-family:Consolas,monospace;font-size:13px}
+.var-field input:focus{outline:none;border-color:var(--var-bg);box-shadow:0 0 0 2px color-mix(in srgb,var(--var-bg) 35%,transparent)}
+.var-field.wide input{width:250px}
+
+.layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - var(--hh,110px))}
+.card,.guide{scroll-margin-top:calc(var(--hh,110px) + 12px)}
+nav{border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:var(--hh,110px);align-self:start;max-height:calc(100vh - var(--hh,110px));overflow:auto}
+nav h4{margin:14px 10px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+nav h4:first-child{margin-top:0}
+nav button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;padding:6px 10px;border-radius:6px;cursor:pointer;color:var(--text)}
+nav button:hover{background:var(--panel2)}
+nav button.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav .count{font-size:11px;color:var(--muted);background:var(--panel2);border-radius:10px;padding:0 7px}
+nav button.active .count{background:var(--panel)}
+
+main{padding:18px 22px 60px;min-width:0}
+.view-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.view-head h2{margin:0;font-size:20px}
+.view-head p{margin:2px 0 0;color:var(--muted)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.card-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:12px 14px 6px}
+.card-title{font-weight:650;font-size:15px}
+.card-cat{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.card-desc{padding:0 14px 10px;color:var(--muted)}
+.card-desc b{color:var(--text)}
+.badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.badge{font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px;white-space:nowrap}
+.b-admin{background:var(--warn-soft);color:var(--warn)}
+.b-changes{background:var(--danger-soft);color:var(--danger)}
+.b-remote{background:var(--purple-soft);color:var(--purple)}
+.b-rsat{background:var(--accent-soft);color:var(--accent)}
+.b-net{background:var(--ok-soft);color:var(--ok)}
+.b-cmd{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.b-mac{background:#e8e8ed;color:#3a3a45;border:1px solid #c9c9d2}
+:root[data-theme="dark"] .b-mac,:root:not([data-theme="light"]) .b-mac{background:#2b2f3a;color:#c9d2de;border-color:#3b4250}
+.b-sudo{background:var(--warn-soft);color:var(--warn)}
+
+.codewrap{position:relative;background:var(--code-bg)}
+pre{margin:0;padding:14px 16px;color:var(--code-text);font-size:13px;line-height:1.55;overflow:auto;white-space:pre;tab-size:2}
+pre .c{color:var(--code-comment)}
+pre .v{background:var(--var-bg);color:var(--var-text);border-radius:3px;padding:0 3px}
+.card-actions{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--line);background:var(--panel2);align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.star{margin-left:auto;border:0;background:none;cursor:pointer;font-size:18px;line-height:1;color:var(--muted)}
+.star.on{color:#e0a800}
+
+.guide{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.guide summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary .gt{font-weight:650;font-size:15px}
+.guide summary .gs{color:var(--muted);font-size:13px}
+.guide summary .chev{transition:transform .15s;color:var(--muted)}
+.guide[open] summary .chev{transform:rotate(90deg)}
+.guide[open] summary{border-bottom:1px solid var(--line)}
+.guide ol{margin:0;padding:14px 18px 14px 40px}
+.guide li{margin-bottom:9px}
+.guide li::marker{color:var(--accent);font-weight:700}
+.chip{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--accent-soft);border-radius:12px;padding:0 9px;font-size:12px;cursor:pointer;margin:2px 2px 0 0;font-weight:600}
+.chip:hover{background:var(--accent);color:#fff}
+.tip{margin:0 16px 14px;padding:10px 12px;border-radius:8px;background:var(--warn-soft);color:var(--text);border-left:3px solid var(--warn);font-size:13px}
+
+table.runs{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.runs th,.runs td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.runs th{background:var(--panel2);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.runs td.cmd{font-family:Consolas,monospace;white-space:nowrap}
+.runs tr:hover td{background:var(--panel2)}
+
+.notes-box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.notes-box textarea{width:100%;min-height:380px;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--panel2);font-family:Consolas,monospace;font-size:13px;resize:vertical}
+.notes-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+
+.section-label{margin:22px 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.empty{padding:40px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:10px}
+.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--var-bg)}100%{box-shadow:0 0 0 0 transparent}}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr}
+  nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;gap:4px;padding:8px}
+  nav h4{display:none}
+  nav button{width:auto;white-space:nowrap;gap:6px}
+  .brand span.name{display:none}
+  .var-field input,.var-field.wide input{width:120px}
+  main{padding:14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand"><div class="logo">PS&gt;</div><span class="name">IT Tech Toolkit</span></div>
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" placeholder="Search scripts and guides — e.g. vpn, mac, teams, printer, locked, ip" autocomplete="off">
+      <kbd>/</kbd>
+    </div>
+    <button class="iconbtn" id="themeBtn" title="Toggle light/dark">Theme</button>
+  </div>
+  <div class="varbar">
+    <span class="lbl">Fill-ins</span>
+    <div class="var-field"><label for="v_COMPUTER">Computer</label><input id="v_COMPUTER" data-var="COMPUTER"></div>
+    <div class="var-field"><label for="v_IP">IP</label><input id="v_IP" data-var="IP"></div>
+    <div class="var-field"><label for="v_USER">User</label><input id="v_USER" data-var="USER"></div>
+    <div class="var-field"><label for="v_PROCESS">Process</label><input id="v_PROCESS" data-var="PROCESS"></div>
+    <div class="var-field"><label for="v_APP">App</label><input id="v_APP" data-var="APP"></div>
+    <div class="var-field"><label for="v_DOMAIN">Domain</label><input id="v_DOMAIN" data-var="DOMAIN"></div>
+    <div class="var-field wide"><label for="v_FILE">File</label><input id="v_FILE" data-var="FILE"></div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   IT TECH TOOLKIT
+   Everything lives in this one file. To add a script, copy one
+   of the S(...) lines below and change the text.
+   Fill-ins: {{COMPUTER}} {{IP}} {{USER}} {{PROCESS}} {{APP}} {{FILE}}
+   Badges: admin, changes, remote, rsat, net, cmd
+   ============================================================ */
+
+const DEFAULTS = {COMPUTER:'PC-NAME', IP:'8.8.8.8', USER:'jsmith', PROCESS:'wermgr', APP:'Chrome', DOMAIN:'corp.example.com', FILE:'C:\\Users\\Public\\Downloads\\file.exe'};
+
+const CATS = [
+  {id:'info',     name:'System info'},
+  {id:'network',  name:'Network'},
+  {id:'security', name:'Security & triage'},
+  {id:'perf',     name:'Performance & disk'},
+  {id:'print',    name:'Printing'},
+  {id:'accounts', name:'Accounts & AD'},
+  {id:'updates',  name:'Windows Update'},
+  {id:'office',   name:'Office, Teams & OneDrive'},
+  {id:'remote',   name:'Remote admin'},
+  {id:'hardware', name:'Hardware & drivers'},
+  {id:'logs',     name:'Event logs'},
+  {id:'vpn',      name:'AWS VPN Client'},
+  {id:'mac',      name:'macOS'},
+  {id:'macad',    name:'macOS accounts & domain'}
+];
+
+const SCRIPTS = [];
+function S(id, cat, title, badges, desc, code){ SCRIPTS.push({id, cat, title, badges, desc, code: code.replace(/^\n/, '').replace(/\s+$/, '')}); }
+
+/* ---------------- SYSTEM INFO ---------------- */
+S('sys-snapshot','info','Full system snapshot',[],
+'One-shot overview: user, model, serial, OS build, CPU, RAM and uptime. Great first thing to run on any machine.',
+String.raw`
+$os   = Get-CimInstance Win32_OperatingSystem
+$cs   = Get-CimInstance Win32_ComputerSystem
+$bios = Get-CimInstance Win32_BIOS
+$cpu  = Get-CimInstance Win32_Processor | Select-Object -First 1
+[PSCustomObject]@{
+  ComputerName = $env:COMPUTERNAME
+  LoggedOnUser = $cs.UserName
+  Domain       = $cs.Domain
+  Manufacturer = $cs.Manufacturer
+  Model        = $cs.Model
+  SerialNumber = $bios.SerialNumber
+  OS           = $os.Caption
+  Build        = $os.BuildNumber
+  CPU          = $cpu.Name
+  RAM_GB       = [math]::Round($cs.TotalPhysicalMemory / 1GB, 1)
+  LastBoot     = $os.LastBootUpTime
+  UptimeDays   = [math]::Round(((Get-Date) - $os.LastBootUpTime).TotalDays, 1)
+} | Format-List`);
+
+S('uptime','info','How long since last reboot',[],
+'Lots of "slow PC" and weird-glitch tickets are machines that have not been restarted in weeks. Note: Fast Startup means shutting down does not reset this, only Restart does.',
+String.raw`
+$boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+$up   = (Get-Date) - $boot
+"Last boot: $boot"
+"Uptime:    {0} days {1} hours {2} mins" -f $up.Days, $up.Hours, $up.Minutes`);
+
+S('os-version','info','Windows version and build',[],
+'Shows the edition, feature version (e.g. 23H2 / 24H2) and exact build. ProductName can still say "Windows 10" on Windows 11 machines; a build of 22000 or higher means Windows 11.',
+String.raw`
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' |
+  Select-Object ProductName, EditionID, DisplayVersion, CurrentBuild, UBR |
+  Format-List`);
+
+S('logged-on','info','Who is logged on',['cmd'],
+'Shows every session on the machine, including disconnected RDP sessions that may be holding files or licences open.',
+String.raw`
+quser`);
+
+S('installed-apps','info','List all installed software',[],
+'Pulls from all three uninstall registry locations (64-bit, 32-bit and per-user), so it catches things Programs and Features sometimes misses.',
+String.raw`
+$paths = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+Get-ItemProperty $paths -ErrorAction SilentlyContinue |
+  Where-Object DisplayName |
+  Select-Object DisplayName, DisplayVersion, Publisher, InstallDate |
+  Sort-Object DisplayName |
+  Format-Table -AutoSize`);
+
+S('find-app','info','Is a specific app installed? (uses App)',[],
+'Searches installed software for the name in the <b>App</b> fill-in box and shows version and uninstall string.',
+String.raw`
+$name  = '{{APP}}'
+$paths = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+Get-ItemProperty $paths -ErrorAction SilentlyContinue |
+  Where-Object { $_.DisplayName -like "*$name*" } |
+  Select-Object DisplayName, DisplayVersion, Publisher, InstallDate, UninstallString |
+  Format-List`);
+
+S('reboot-history','info','Recent shutdowns, restarts and crashes',[],
+'Event 1074 = someone or something restarted it (shows who/what). 6008 = unexpected shutdown. 41 = lost power or hard crash.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='System'; Id=1074,6008,41 } -MaxEvents 20 -ErrorAction SilentlyContinue |
+  Select-Object TimeCreated, Id, @{n='Message';e={ ($_.Message -split "\r?\n")[0] }} |
+  Format-Table -AutoSize -Wrap`);
+
+/* ---------------- NETWORK ---------------- */
+S('net-overview','network','Network adapters, IPs, gateway and DNS',[],
+'Quick view of every connected adapter with its IP, default gateway and DNS servers. A 169.254.x.x address means DHCP failed.',
+String.raw`
+Get-NetIPConfiguration | Where-Object { $_.NetAdapter.Status -eq 'Up' } | ForEach-Object {
+  [PSCustomObject]@{
+    Adapter = $_.InterfaceAlias
+    IPv4    = ($_.IPv4Address.IPAddress -join ', ')
+    Gateway = ($_.IPv4DefaultGateway.NextHop -join ', ')
+    DNS     = ($_.DNSServer | Where-Object AddressFamily -eq 2 | ForEach-Object ServerAddresses) -join ', '
+  }
+} | Format-Table -AutoSize`);
+
+S('public-ip','network','What is my public IP?',['net'],
+'Shows the public IP this machine is coming out from, plus the ISP and location. Handy for checking if the VPN is actually in use.',
+String.raw`
+Invoke-RestMethod "https://ipinfo.io/json"`);
+
+S('ip-lookup','network','Who owns this IP? (uses IP)',['net'],
+'Your favourite. Looks up the IP in the <b>IP</b> fill-in box. The <b>org</b> field tells you who owns it. If the corporate proxy blocks it, paste the IP into ipinfo.io, AbuseIPDB or VirusTotal in a browser instead.',
+String.raw`
+Invoke-RestMethod "https://ipinfo.io/{{IP}}/json"`);
+
+S('conn-owners','network','Every live connection with its owner (IP lookup on steroids)',['net'],
+'Takes every established outbound connection, skips private/internal addresses, and looks each public IP up on ipinfo.io. You get process name, PID, remote IP and who owns it in one table. Good for spotting something talking to a host it has no business talking to.',
+String.raw`
+$private = '^(10\.|127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.|0\.0\.0\.0|::|fe80)'
+$cache   = @{}
+Get-NetTCPConnection -State Established |
+  Where-Object { $_.RemoteAddress -notmatch $private } |
+  ForEach-Object {
+    $ip = $_.RemoteAddress
+    if (-not $cache.ContainsKey($ip)) {
+      try   { $cache[$ip] = Invoke-RestMethod "https://ipinfo.io/$ip/json" -TimeoutSec 5 }
+      catch { $cache[$ip] = [PSCustomObject]@{ org = 'lookup failed'; country = '' } }
+      Start-Sleep -Milliseconds 200
+    }
+    [PSCustomObject]@{
+      Process  = (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName
+      PID      = $_.OwningProcess
+      RemoteIP = $ip
+      Port     = $_.RemotePort
+      Owner    = $cache[$ip].org
+      Country  = $cache[$ip].country
+    }
+  } | Sort-Object Process | Format-Table -AutoSize`);
+
+S('test-port','network','Can I reach a host on a port? (uses Computer)',['net'],
+'Tests ping and a TCP port to the host in the <b>Computer</b> box. TcpTestSucceeded True means the port is open and reachable. Change 443 to 3389 (RDP), 445 (file shares), 5985 (WinRM) etc.',
+String.raw`
+Test-NetConnection {{COMPUTER}} -Port 443`);
+
+S('traceroute','network','Trace the route to a host (uses Computer)',['net'],
+'Shows each hop between here and the target. Where the hops stop replying is roughly where the problem is.',
+String.raw`
+Test-NetConnection {{COMPUTER}} -TraceRoute`);
+
+S('dns-lookup','network','DNS lookup (uses Computer)',['net'],
+'Checks what the name resolves to. If it resolves to the wrong IP or not at all, it is a DNS problem, not a network one.',
+String.raw`
+Resolve-DnsName {{COMPUTER}}
+# Compare against a specific DNS server:
+# Resolve-DnsName {{COMPUTER}} -Server 8.8.8.8`);
+
+S('flush-dns','network','Flush the DNS cache',['changes'],
+'Safe and instant. Fixes websites or servers that have moved to a new IP but the PC still remembers the old one.',
+String.raw`
+Clear-DnsClientCache
+ipconfig /flushdns
+Write-Host 'DNS cache cleared.'`);
+
+S('net-reset','network','Full network stack reset',['admin','changes'],
+'The big hammer for "no internet" when everything else looks fine. Releases/renews the IP, flushes DNS and resets Winsock and TCP/IP. <b>A reboot is required afterwards</b> and the connection will drop, so do not run this over a remote session.',
+String.raw`
+ipconfig /release
+ipconfig /renew
+ipconfig /flushdns
+netsh winsock reset
+netsh int ip reset
+Write-Host 'Done. Restart the PC now.' -ForegroundColor Yellow`);
+
+S('wifi-info','network','Wi-Fi signal and connection details',['cmd'],
+'Shows the SSID, signal strength, band, channel and link speed. Signal below about 60% explains a lot of dropouts and slow Teams calls.',
+String.raw`
+netsh wlan show interfaces`);
+
+S('wifi-key','network','Show saved Wi-Fi networks and a password',['admin','cmd'],
+'Lists saved Wi-Fi profiles. Replace NETWORKNAME in the second line with one of them to see its saved password (Key Content).',
+String.raw`
+netsh wlan show profiles
+netsh wlan show profile name="NETWORKNAME" key=clear`);
+
+S('listening-ports','network','What is listening on this machine?',[],
+'Every open listening port and the process behind it. Anything unexpected listening (especially on 0.0.0.0) is worth a closer look.',
+String.raw`
+Get-NetTCPConnection -State Listen |
+  Select-Object LocalAddress, LocalPort, OwningProcess,
+    @{n='Process';e={ (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName }} |
+  Sort-Object LocalPort |
+  Format-Table -AutoSize`);
+
+S('proxy-check','network','Check proxy settings',[],
+'Shows both the system (WinHTTP) proxy and the user proxy. A stale proxy setting is a classic cause of "internet works in one app but not another".',
+String.raw`
+netsh winhttp show proxy
+Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' |
+  Select-Object ProxyEnable, ProxyServer, ProxyOverride, AutoConfigURL |
+  Format-List`);
+
+S('mapped-drives','network','List mapped drives',[],
+'Shows mapped network drives and where they point. Run as the user (not elevated), because admin sessions do not see the user\'s mappings.',
+String.raw`
+Get-PSDrive -PSProvider FileSystem | Where-Object DisplayRoot |
+  Select-Object Name, DisplayRoot, @{n='FreeGB';e={ [math]::Round($_.Free/1GB,1) }} |
+  Format-Table -AutoSize
+net use`);
+
+S('map-drive','network','Map a network drive',['changes'],
+'Edit the letter and path first. Run as the user, not as admin. Persistent means it comes back after a reboot.',
+String.raw`
+net use Z: \\server\share /persistent:yes
+# Remove it again:
+# net use Z: /delete`);
+
+/* ---------------- SECURITY & TRIAGE ---------------- */
+S('proc-inspect','security','Inspect a process: path, signature, parent (uses Process)',[],
+'The triage check from our wermgr / agentsvc work. Put the process name in the <b>Process</b> box. Red flags: path outside System32 or Program Files (e.g. AppData, Temp, ProgramData), signature not Valid, odd parent (Office app, cmd, powershell, rundll32), strange command line.',
+String.raw`
+$name = '{{PROCESS}}'
+Get-CimInstance Win32_Process -Filter "Name LIKE '$name%'" | ForEach-Object {
+  $parent = Get-CimInstance Win32_Process -Filter "ProcessId=$($_.ParentProcessId)" -ErrorAction SilentlyContinue
+  $sig    = if ($_.ExecutablePath) { Get-AuthenticodeSignature $_.ExecutablePath } else { $null }
+  [PSCustomObject]@{
+    Name        = $_.Name
+    PID         = $_.ProcessId
+    Path        = $_.ExecutablePath
+    CommandLine = $_.CommandLine
+    Parent      = if ($parent) { "$($parent.Name) ($($_.ParentProcessId))" } else { "exited ($($_.ParentProcessId))" }
+    Signature   = if ($sig) { $sig.Status } else { 'n/a (run as admin?)' }
+    SignedBy    = if ($sig -and $sig.SignerCertificate) { $sig.SignerCertificate.Subject } else { '' }
+    Started     = $_.CreationDate
+  }
+} | Format-List`);
+
+S('unsigned-procs','security','Running processes that are not validly signed',['admin'],
+'Checks the digital signature of every running program. Unsigned is not automatically bad (some in-house or small-vendor tools are unsigned) but it is where to start looking.',
+String.raw`
+Get-Process | Where-Object Path | Sort-Object Path -Unique | ForEach-Object {
+  $sig = Get-AuthenticodeSignature $_.Path
+  if ($sig.Status -ne 'Valid') {
+    [PSCustomObject]@{ Name = $_.ProcessName; PID = $_.Id; Status = $sig.Status; Path = $_.Path }
+  }
+} | Format-Table -AutoSize`);
+
+S('procs-userpaths','security','Processes running from user-writable folders',[],
+'Malware loves AppData, Temp, ProgramData and Public. Some legit apps (Teams, Zoom, Spotify, Chrome updaters) also live in AppData, so check each one.',
+String.raw`
+Get-Process | Where-Object { $_.Path -match '\\AppData\\|\\Temp\\|\\ProgramData\\|\\Users\\Public\\' } |
+  Select-Object ProcessName, Id, Path |
+  Sort-Object Path |
+  Format-Table -AutoSize`);
+
+S('sched-tasks','security','Non-Microsoft scheduled tasks',[],
+'Scheduled tasks are a favourite persistence trick. This hides the built-in Microsoft ones and shows what each remaining task actually runs.',
+String.raw`
+Get-ScheduledTask | Where-Object { $_.TaskPath -notlike '\Microsoft\*' } | ForEach-Object {
+  [PSCustomObject]@{
+    Task   = $_.TaskPath + $_.TaskName
+    State  = $_.State
+    Author = $_.Author
+    Runs   = ($_.Actions | ForEach-Object { "$($_.Execute) $($_.Arguments)" }) -join '; '
+  }
+} | Format-Table -AutoSize -Wrap`);
+
+S('startup-items','security','Startup programs and Run keys',[],
+'Everything set to launch at logon. Useful both for security (persistence) and for slow logons.',
+String.raw`
+Get-CimInstance Win32_StartupCommand |
+  Select-Object Name, Command, Location, User |
+  Format-Table -AutoSize -Wrap`);
+
+S('local-admins','security','Who is a local administrator?',[],
+'Lists members of the local Administrators group. If the first command errors (it can with orphaned accounts), the second always works.',
+String.raw`
+Get-LocalGroupMember -Group Administrators | Select-Object Name, ObjectClass, PrincipalSource
+net localgroup administrators`);
+
+S('failed-logons','security','Failed logons in the last 24 hours',['admin'],
+'Event 4625. Logon type 2 = at the keyboard, 3 = network, 10 = RDP. Lots of failures from one source IP = password spraying or a device with an old saved password.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='Security'; Id=4625; StartTime=(Get-Date).AddHours(-24) } -ErrorAction SilentlyContinue |
+  ForEach-Object {
+    $x = [xml]$_.ToXml(); $d = @{}
+    $x.Event.EventData.Data | ForEach-Object { $d[$_.Name] = $_.'#text' }
+    [PSCustomObject]@{
+      Time        = $_.TimeCreated
+      User        = $d['TargetUserName']
+      Domain      = $d['TargetDomainName']
+      LogonType   = $d['LogonType']
+      SourceIP    = $d['IpAddress']
+      Workstation = $d['WorkstationName']
+    }
+  } | Format-Table -AutoSize`);
+
+S('success-logons','security','Interactive and RDP logons (last 7 days)',['admin'],
+'Event 4624 filtered to real people: type 2 (keyboard), 10 (RDP) and 11 (cached). Shows who actually sat at or remoted into this machine.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='Security'; Id=4624; StartTime=(Get-Date).AddDays(-7) } -ErrorAction SilentlyContinue |
+  ForEach-Object {
+    $x = [xml]$_.ToXml(); $d = @{}
+    $x.Event.EventData.Data | ForEach-Object { $d[$_.Name] = $_.'#text' }
+    if ($d['LogonType'] -in '2','10','11') {
+      [PSCustomObject]@{
+        Time      = $_.TimeCreated
+        User      = "$($d['TargetDomainName'])\$($d['TargetUserName'])"
+        LogonType = $d['LogonType']
+        SourceIP  = $d['IpAddress']
+      }
+    }
+  } | Format-Table -AutoSize`);
+
+S('rdp-logons','security','Remote Desktop session history',[],
+'Event 21 = session logon, 24 = disconnected, 25 = reconnected. Includes the source address the connection came from.',
+String.raw`
+Get-WinEvent -LogName 'Microsoft-Windows-TerminalServices-LocalSessionManager/Operational' -MaxEvents 50 -ErrorAction SilentlyContinue |
+  Where-Object Id -in 21,24,25 |
+  Select-Object TimeCreated, Id, @{n='Detail';e={ ($_.Message -split "\r?\n" | Where-Object { $_ -match 'User:|Source Network Address:' }) -join ' | ' }} |
+  Format-Table -AutoSize -Wrap`);
+
+S('defender-status','security','Defender status and recent detections',[],
+'Is real-time protection on, are signatures current, when was the last scan, and has anything been caught. If AMRunningMode says Passive, another AV/EDR is the primary.',
+String.raw`
+Get-MpComputerStatus |
+  Select-Object AMRunningMode, AntivirusEnabled, RealTimeProtectionEnabled, AntivirusSignatureLastUpdated, QuickScanEndTime, FullScanEndTime |
+  Format-List
+Get-MpThreatDetection | Select-Object InitialDetectionTime, ProcessName, @{n='Resources';e={ $_.Resources -join '; ' }}, ActionSuccess |
+  Format-Table -AutoSize -Wrap`);
+
+S('defender-scan','security','Update Defender and run a quick scan',['admin','changes'],
+'Pulls the latest signatures first, then runs a quick scan. Takes a few minutes.',
+String.raw`
+Update-MpSignature
+Start-MpScan -ScanType QuickScan
+Get-MpThreatDetection | Select-Object InitialDetectionTime, ProcessName, ActionSuccess`);
+
+S('file-hash','security','Hash a file and open it in VirusTotal (uses File)',['net'],
+'Gets the SHA256 of the file in the <b>File</b> box and opens its VirusTotal page. Only the hash is sent, not the file, so it is safe for confidential stuff.',
+String.raw`
+$hash = (Get-FileHash '{{FILE}}' -Algorithm SHA256).Hash
+$hash
+Start-Process "https://www.virustotal.com/gui/file/$hash"`);
+
+S('file-sig','security','Check a file\'s digital signature (uses File)',[],
+'Status should be Valid and the Subject should be the company you expect.',
+String.raw`
+Get-AuthenticodeSignature '{{FILE}}' |
+  Select-Object Status, StatusMessage, @{n='SignedBy';e={ $_.SignerCertificate.Subject }} |
+  Format-List`);
+
+S('new-exes','security','New executables and scripts in the last 7 days',[],
+'Looks in Downloads, AppData, Temp and ProgramData for new .exe/.dll/.ps1/.bat/.vbs/.js/.hta files. Run it as the affected user (not elevated as a different account) so it checks their profile.',
+String.raw`
+$since = (Get-Date).AddDays(-7)
+Get-ChildItem -Path "$env:USERPROFILE\Downloads", "$env:USERPROFILE\AppData", $env:TEMP, 'C:\ProgramData' -Recurse -File -Include *.exe,*.dll,*.ps1,*.bat,*.vbs,*.js,*.hta -ErrorAction SilentlyContinue |
+  Where-Object { $_.CreationTime -gt $since } |
+  Select-Object CreationTime, @{n='KB';e={ [math]::Round($_.Length/1KB) }}, FullName |
+  Sort-Object CreationTime -Descending |
+  Format-Table -AutoSize`);
+
+S('ps-history','security','PowerShell history for a user (uses User)',['admin'],
+'The last 50 commands typed into PowerShell by the user in the <b>User</b> box. Very handy in an investigation.',
+String.raw`
+Get-Content 'C:\Users\{{USER}}\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt' -Tail 50`);
+
+S('hosts-check','security','Check the hosts file for tampering',[],
+'Shows any active (non-comment) entries. A clean hosts file normally has none. Entries pointing banking or Microsoft sites somewhere else are a big red flag.',
+String.raw`
+Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" |
+  Where-Object { $_.Trim() -and $_ -notmatch '^\s*#' }`);
+
+S('dns-cache','security','What has this PC been resolving? (DNS cache)',[],
+'Recent DNS lookups. Good for spotting odd domains without needing a proxy log.',
+String.raw`
+Get-DnsClientCache | Select-Object Entry, Data | Sort-Object Entry -Unique | Format-Table -AutoSize`);
+
+S('firewall-status','security','Firewall status',[],
+'All three profiles (Domain, Private, Public) should normally be Enabled.',
+String.raw`
+Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, DefaultOutboundAction | Format-Table -AutoSize`);
+
+S('bitlocker','security','BitLocker status and recovery key',['admin'],
+'Shows whether the drive is encrypted and lists the protectors. The Numerical Password entry is the 48-digit recovery key. Treat it like a password.',
+String.raw`
+manage-bde -status C:
+manage-bde -protectors -get C:`);
+
+/* ---------------- PERFORMANCE & DISK ---------------- */
+S('top-cpu','perf','Top 10 processes by CPU right now',[],
+'A live sample of CPU use, adjusted for the number of cores so the figures are real percentages.',
+String.raw`
+(Get-Counter '\Process(*)\% Processor Time' -ErrorAction SilentlyContinue).CounterSamples |
+  Where-Object { $_.InstanceName -notin '_total','idle' } |
+  Sort-Object CookedValue -Descending |
+  Select-Object -First 10 InstanceName, @{n='CPU%';e={ [math]::Round($_.CookedValue / $env:NUMBER_OF_PROCESSORS, 1) }} |
+  Format-Table -AutoSize`);
+
+S('top-mem','perf','Top 10 processes by memory',[],
+'Which apps are eating RAM. Browsers with dozens of tabs and Teams are the usual suspects.',
+String.raw`
+Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 10 Name, Id,
+  @{n='MemoryMB';e={ [math]::Round($_.WorkingSet64 / 1MB) }} |
+  Format-Table -AutoSize
+$os = Get-CimInstance Win32_OperatingSystem
+"Memory in use: {0}%" -f [math]::Round((1 - $os.FreePhysicalMemory / $os.TotalVisibleMemorySize) * 100)`);
+
+S('disk-space','perf','Disk space on all drives',[],
+'Under 10% free on C: will slow Windows down and break updates.',
+String.raw`
+Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" |
+  Select-Object DeviceID,
+    @{n='SizeGB';e={ [math]::Round($_.Size/1GB,1) }},
+    @{n='FreeGB';e={ [math]::Round($_.FreeSpace/1GB,1) }},
+    @{n='Free%'; e={ [math]::Round($_.FreeSpace/$_.Size*100) }} |
+  Format-Table -AutoSize`);
+
+S('clear-temp','perf','Clear temp folders',['admin','changes'],
+'Empties the user and Windows temp folders and tells you how much was freed. Files in use are skipped automatically, so it is safe.',
+String.raw`
+$targets = "$env:TEMP", "$env:SystemRoot\Temp"
+$before  = ($targets | ForEach-Object { Get-ChildItem $_ -Recurse -File -Force -ErrorAction SilentlyContinue } | Measure-Object Length -Sum).Sum
+foreach ($t in $targets) { Get-ChildItem $t -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue }
+$after   = ($targets | ForEach-Object { Get-ChildItem $_ -Recurse -File -Force -ErrorAction SilentlyContinue } | Measure-Object Length -Sum).Sum
+"Freed about {0} MB" -f [math]::Round(($before - $after) / 1MB)`);
+
+S('big-folders','perf','Biggest folders in a user profile (uses User)',[],
+'Finds what is eating a user\'s space. Usually Downloads, Desktop, an old OST or a OneDrive folder with Files On-Demand turned off.',
+String.raw`
+$root = 'C:\Users\{{USER}}'
+Get-ChildItem $root -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
+  $size = (Get-ChildItem $_.FullName -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
+  [PSCustomObject]@{ Folder = $_.Name; SizeGB = [math]::Round($size / 1GB, 2) }
+} | Sort-Object SizeGB -Descending | Format-Table -AutoSize`);
+
+S('big-files','perf','Files over 1 GB on C:',['admin'],
+'Takes a minute or two. Finds ISOs, old backups, videos and forgotten VM disks.',
+String.raw`
+Get-ChildItem C:\ -Recurse -File -Force -ErrorAction SilentlyContinue |
+  Where-Object { $_.Length -gt 1GB } |
+  Select-Object @{n='SizeGB';e={ [math]::Round($_.Length/1GB,2) }}, LastWriteTime, FullName |
+  Sort-Object SizeGB -Descending |
+  Format-Table -AutoSize`);
+
+S('sfc-dism','perf','Repair Windows system files (DISM + SFC)',['admin','changes'],
+'Fixes corrupted Windows files. Run DISM first (it repairs the store SFC uses), then SFC. Takes 10 to 30 minutes. Reboot afterwards.',
+String.raw`
+DISM /Online /Cleanup-Image /RestoreHealth
+sfc /scannow`);
+
+S('restart-explorer','perf','Restart Explorer (frozen taskbar or Start menu)',['changes'],
+'Fixes a stuck taskbar, Start menu or desktop without a reboot. The screen flickers for a second.',
+String.raw`
+Stop-Process -Name explorer -Force
+Start-Sleep 2
+if (-not (Get-Process explorer -ErrorAction SilentlyContinue)) { Start-Process explorer.exe }`);
+
+S('disk-health','perf','Disk health (SSD / HDD)',[],
+'HealthStatus should be Healthy. Anything else means back up now and replace the drive. MediaType HDD in a slow machine is often the whole problem.',
+String.raw`
+Get-PhysicalDisk |
+  Select-Object FriendlyName, MediaType, HealthStatus, OperationalStatus, @{n='SizeGB';e={ [math]::Round($_.Size/1GB) }} |
+  Format-Table -AutoSize`);
+
+S('power-plan','perf','Check and switch power plan',['changes'],
+'Laptops stuck on Power Saver are slow. The second line switches to High Performance (may be hidden on some laptops that use Balanced + power mode slider instead).',
+String.raw`
+powercfg /list
+powercfg /setactive SCHEME_MIN`);
+
+/* ---------------- PRINTING ---------------- */
+S('list-printers','print','List installed printers',[],
+'Shows each printer, its driver, port and status, and which one is the default.',
+String.raw`
+Get-CimInstance Win32_Printer |
+  Select-Object Name, Default, PrinterStatus, DriverName, PortName |
+  Format-Table -AutoSize`);
+
+S('clear-spooler','print','Restart spooler and clear stuck jobs',['admin','changes'],
+'The number-one printer fix. Stops the spooler, deletes all stuck jobs, and starts it again. This clears jobs for every printer on the machine.',
+String.raw`
+Stop-Service Spooler -Force
+Remove-Item "$env:SystemRoot\System32\spool\PRINTERS\*" -Force -ErrorAction SilentlyContinue
+Start-Service Spooler
+Get-Service Spooler`);
+
+S('print-jobs','print','Show print queue for every printer',[],
+'See what is waiting and whether a single job is in Error and blocking the rest.',
+String.raw`
+Get-Printer | ForEach-Object { Get-PrintJob -PrinterName $_.Name -ErrorAction SilentlyContinue } |
+  Select-Object PrinterName, Id, DocumentName, UserName, JobStatus, SubmittedTime |
+  Format-Table -AutoSize`);
+
+S('add-printer','print','Add a shared network printer',['changes'],
+'Edit the print server and printer name. Run as the user so it lands in their profile.',
+String.raw`
+Add-Printer -ConnectionName '\\printserver\PrinterName'`);
+
+S('default-printer','print','Stop Windows changing the default printer, then set it',['changes'],
+'Windows likes to make the last-used printer the default. The first line turns that off; edit the name in the second part to set the default.',
+String.raw`
+Set-ItemProperty 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Windows' -Name LegacyDefaultPrinterMode -Value 1
+Get-CimInstance Win32_Printer -Filter "Name='Printer Name Here'" | Invoke-CimMethod -MethodName SetDefaultPrinter`);
+
+S('test-page','print','Send a test page',[],
+'Edit the printer name. Tells you if the problem is the printer or the app.',
+String.raw`
+Get-CimInstance Win32_Printer -Filter "Name='Printer Name Here'" | Invoke-CimMethod -MethodName PrintTestPage`);
+
+/* ---------------- ACCOUNTS & AD ---------------- */
+S('whoami','accounts','Who am I, and what groups am I in?',['cmd'],
+'Confirms the account, UPN and group memberships of the current session. Handy when "access denied" might just be a missing group.',
+String.raw`
+whoami /upn
+whoami /groups /fo table`);
+
+S('gpupdate','accounts','Force a Group Policy refresh',['changes','cmd'],
+'Pulls down the latest policies, drive maps and printers. Needs line of sight to a domain controller (office network or VPN).',
+String.raw`
+gpupdate /force`);
+
+S('gpresult','accounts','Group Policy report',['cmd'],
+'The first line gives a quick text summary. The second builds a full HTML report on the desktop and opens it.',
+String.raw`
+gpresult /r
+gpresult /h "$env:USERPROFILE\Desktop\gpresult.html" /f
+Start-Process "$env:USERPROFILE\Desktop\gpresult.html"`);
+
+S('secure-channel','accounts','Check / repair domain trust',['admin'],
+'For "The trust relationship between this workstation and the primary domain failed". True = healthy. The repair line asks for domain admin credentials and fixes it without rejoining.',
+String.raw`
+Test-ComputerSecureChannel -Verbose
+# If False, repair it:
+# Test-ComputerSecureChannel -Repair -Credential (Get-Credential)`);
+
+S('ad-user','accounts','AD account status: locked, expired, last logon (uses User)',['rsat'],
+'Everything you need for "I can\'t log in" in one go. Needs the RSAT Active Directory module.',
+String.raw`
+Get-ADUser {{USER}} -Properties LockedOut, Enabled, PasswordLastSet, PasswordExpired, LastLogonDate, BadLogonCount, 'msDS-UserPasswordExpiryTimeComputed' |
+  Select-Object Name, SamAccountName, Enabled, LockedOut, PasswordExpired, PasswordLastSet, LastLogonDate, BadLogonCount,
+    @{n='PasswordExpires';e={ [datetime]::FromFileTime($_.'msDS-UserPasswordExpiryTimeComputed') }} |
+  Format-List`);
+
+S('ad-unlock','accounts','Unlock an AD account (uses User)',['rsat','changes'],
+'Unlocks straight away. If it locks again within minutes, find the source with the lockout script before unlocking again.',
+String.raw`
+Unlock-ADAccount {{USER}}
+Get-ADUser {{USER}} -Properties LockedOut | Select-Object SamAccountName, LockedOut`);
+
+S('net-user','accounts','Account status without RSAT (uses User)',['cmd'],
+'Works on any domain-joined PC. Look at "Account active", "Password expires" and "Last logon".',
+String.raw`
+net user {{USER}} /domain`);
+
+S('lockout-source','accounts','Find what keeps locking an account (uses User)',['rsat','admin'],
+'Reads lockout events (4740) on the PDC emulator and shows which machine caused the lockout. Usually a phone with an old password, a mapped drive with saved creds, or a disconnected RDP session.',
+String.raw`
+$pdc = (Get-ADDomain).PDCEmulator
+Get-WinEvent -ComputerName $pdc -FilterHashtable @{ LogName='Security'; Id=4740 } -MaxEvents 200 -ErrorAction SilentlyContinue |
+  Where-Object { $_.Properties[0].Value -eq '{{USER}}' } |
+  Select-Object TimeCreated, @{n='User';e={ $_.Properties[0].Value }}, @{n='LockedFrom';e={ $_.Properties[1].Value }} |
+  Format-Table -AutoSize`);
+
+S('ad-groups','accounts','A user\'s AD groups (uses User)',['rsat'],
+'Compare against a colleague who can access the thing this user can\'t.',
+String.raw`
+Get-ADPrincipalGroupMembership {{USER}} | Select-Object Name | Sort-Object Name`);
+
+S('dsreg','accounts','Entra ID (Azure AD) join and SSO status',['cmd'],
+'Check AzureAdJoined / DomainJoined, and AzureAdPrt = YES. If AzureAdPrt is NO, single sign-on to Office and Teams will keep prompting for passwords.',
+String.raw`
+dsregcmd /status`);
+
+S('cred-list','accounts','List saved credentials (Credential Manager)',['cmd'],
+'Old saved passwords cause lockouts and endless prompts. Remove one with: cmdkey /delete:TARGETNAME',
+String.raw`
+cmdkey /list`);
+
+/* ---------------- WINDOWS UPDATE ---------------- */
+S('hotfixes','updates','Last installed updates',[],
+'The 15 most recent updates and when they went on. Useful for "it broke after an update".',
+String.raw`
+Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 15 HotFixID, Description, InstalledOn | Format-Table -AutoSize`);
+
+S('pending-reboot','updates','Is a reboot pending?',[],
+'Checks the three places Windows records a pending restart. Pending reboots block updates and installs.',
+String.raw`
+$checks = @(
+  (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'),
+  (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'),
+  [bool](Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -ErrorAction SilentlyContinue)
+)
+if ($checks -contains $true) { 'Reboot is pending' } else { 'No reboot pending' }`);
+
+S('wu-reset','updates','Reset Windows Update components',['admin','changes'],
+'For updates stuck downloading or failing with the same error. Stops the services, renames the cache folders (keeps them as .old in case), then restarts. Reboot and check for updates afterwards.',
+String.raw`
+$services = 'wuauserv','bits','cryptsvc','msiserver'
+Stop-Service $services -Force -ErrorAction SilentlyContinue
+$stamp = Get-Date -Format yyyyMMddHHmm
+Rename-Item "$env:SystemRoot\SoftwareDistribution" "SoftwareDistribution.old_$stamp" -ErrorAction SilentlyContinue
+Rename-Item "$env:SystemRoot\System32\catroot2" "catroot2.old_$stamp" -ErrorAction SilentlyContinue
+Start-Service $services -ErrorAction SilentlyContinue
+Write-Host 'Done. Reboot, then check for updates again.' -ForegroundColor Yellow`);
+
+S('wu-open','updates','Open Windows Update settings',[],
+'Jumps straight to the Windows Update page.',
+String.raw`
+Start-Process 'ms-settings:windowsupdate'`);
+
+/* ---------------- OFFICE / TEAMS / ONEDRIVE ---------------- */
+S('teams-cache','office','Clear the (new) Teams cache',['changes'],
+'Fixes Teams not loading, blank screens, stuck status, missing chats and many sign-in loops. Closes Teams, clears the cache and relaunches. Chats and files are not lost; they are in the cloud.',
+String.raw`
+Stop-Process -Name ms-teams -Force -ErrorAction SilentlyContinue
+Start-Sleep 3
+Remove-Item "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams\*" -Recurse -Force -ErrorAction SilentlyContinue
+Start-Process explorer.exe 'shell:AppsFolder\MSTeams_8wekyb3d8bbwe!MSTeams'
+Write-Host 'Teams cache cleared and Teams restarted.'`);
+
+S('outlook-safe','office','Start Outlook in Safe Mode',[],
+'Opens Outlook with no add-ins. If it works in Safe Mode, an add-in is the problem: File > Options > Add-ins > COM Add-ins, untick them one at a time.',
+String.raw`
+Stop-Process -Name OUTLOOK -Force -ErrorAction SilentlyContinue
+Start-Process outlook.exe -ArgumentList '/safe'`);
+
+S('outlook-reset-nav','office','Outlook: reset navigation pane',['changes'],
+'Fixes "Cannot start Microsoft Outlook. Cannot open the Outlook window" and a broken folder pane.',
+String.raw`
+Stop-Process -Name OUTLOOK -Force -ErrorAction SilentlyContinue
+Start-Process outlook.exe -ArgumentList '/resetnavpane'`);
+
+S('ost-folder','office','Open the Outlook data (OST) folder',[],
+'To rebuild a corrupt mailbox cache: close Outlook, rename the .ost for that mailbox to .old, reopen Outlook. It re-downloads from the server.',
+String.raw`
+Start-Process "$env:LOCALAPPDATA\Microsoft\Outlook"`);
+
+S('office-repair','office','Office Quick Repair',['admin','changes'],
+'Repairs Microsoft 365 apps without reinstalling. Closes Office apps. If Quick Repair does not fix it, change QuickRepair to FullRepair (needs internet and takes longer).',
+String.raw`
+& "C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe" scenario=Repair platform=x64 culture=en-gb RepairType=QuickRepair forceappshutdown=True DisplayLevel=True`);
+
+S('office-update','office','Force Office to update now',['changes'],
+'Triggers the Microsoft 365 updater with the progress window.',
+String.raw`
+& "C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe" /update user`);
+
+S('onedrive-reset','office','Reset OneDrive',['changes'],
+'Fixes stuck syncs. Nothing is deleted; OneDrive re-scans everything afterwards, which can take a while on big libraries. Run as the user.',
+String.raw`
+$paths = "$env:LOCALAPPDATA\Microsoft\OneDrive\OneDrive.exe",
+         "C:\Program Files\Microsoft OneDrive\OneDrive.exe",
+         "C:\Program Files (x86)\Microsoft OneDrive\OneDrive.exe"
+$exe = $paths | Where-Object { Test-Path $_ } | Select-Object -First 1
+& $exe /reset
+Start-Sleep 10
+if (-not (Get-Process OneDrive -ErrorAction SilentlyContinue)) { Start-Process $exe }`);
+
+S('office-creds','office','Clear cached Office / Teams sign-in credentials',['changes'],
+'For endless password prompts. Removes saved Microsoft Office, Teams and OneDrive credentials from Credential Manager. The user will need to sign in again.',
+String.raw`
+cmdkey /list | Select-String 'Target:.*(MicrosoftOffice|msteams|OneDrive|microsoft_ms)' | ForEach-Object {
+  $target = ($_.Line -replace '.*Target:\s*', '').Trim()
+  cmdkey /delete:$target
+}`);
+
+/* ---------------- REMOTE ADMIN ---------------- */
+S('remote-ping','remote','Is the machine online? (uses Computer)',['remote'],
+'Quick reachability check before trying anything else.',
+String.raw`
+Test-Connection {{COMPUTER}} -Count 2`);
+
+S('ps-session','remote','Open a remote PowerShell session (uses Computer)',['remote','admin'],
+'An interactive PowerShell prompt on the other machine. Type exit to leave. Needs WinRM enabled on the target.',
+String.raw`
+Enter-PSSession -ComputerName {{COMPUTER}}`);
+
+S('remote-snapshot','remote','Remote system snapshot (uses Computer)',['remote','admin'],
+'Runs a mini snapshot on the remote machine without disturbing the user.',
+String.raw`
+Invoke-Command -ComputerName {{COMPUTER}} -ScriptBlock {
+  $os = Get-CimInstance Win32_OperatingSystem
+  $cs = Get-CimInstance Win32_ComputerSystem
+  [PSCustomObject]@{
+    User       = $cs.UserName
+    Model      = $cs.Model
+    OS         = $os.Caption
+    Build      = $os.BuildNumber
+    UptimeDays = [math]::Round(((Get-Date) - $os.LastBootUpTime).TotalDays, 1)
+    FreeC_GB   = [math]::Round((Get-PSDrive C).Free / 1GB, 1)
+  }
+}`);
+
+S('remote-user','remote','Who is logged on to a remote PC? (uses Computer)',['remote'],
+'Check before restarting someone\'s machine.',
+String.raw`
+query user /server:{{COMPUTER}}
+Get-CimInstance Win32_ComputerSystem -ComputerName {{COMPUTER}} | Select-Object Name, UserName`);
+
+S('remote-disk','remote','Remote disk space (uses Computer)',['remote'],
+'Free space on a remote machine without connecting to it.',
+String.raw`
+Get-CimInstance Win32_LogicalDisk -ComputerName {{COMPUTER}} -Filter "DriveType=3" |
+  Select-Object DeviceID, @{n='FreeGB';e={ [math]::Round($_.FreeSpace/1GB,1) }}, @{n='Free%';e={ [math]::Round($_.FreeSpace/$_.Size*100) }} |
+  Format-Table -AutoSize`);
+
+S('remote-restart','remote','Restart a remote PC (uses Computer)',['remote','admin','changes'],
+'<b>Check who is logged on first.</b> -Force will close their apps without saving.',
+String.raw`
+Restart-Computer -ComputerName {{COMPUTER}} -Force`);
+
+S('remote-cshare','remote','Browse a remote PC\'s C: drive (uses Computer)',['remote','admin'],
+'Opens the admin share in Explorer. Good for grabbing logs without interrupting the user.',
+String.raw`
+explorer.exe '\\{{COMPUTER}}\c$'`);
+
+S('msra','remote','Offer Remote Assistance (uses Computer)',['remote','cmd'],
+'Offers a Windows Remote Assistance session to the machine. For users off-network, use Quick Assist instead (Ctrl + Windows + Q on their machine).',
+String.raw`
+msra /offerra {{COMPUTER}}`);
+
+S('enable-remoting','remote','Enable PowerShell remoting on this PC',['admin','changes'],
+'Run on the target machine if Enter-PSSession / Invoke-Command fails with a WinRM error. Normally this is set by Group Policy instead.',
+String.raw`
+Enable-PSRemoting -Force`);
+
+/* ---------------- HARDWARE ---------------- */
+S('battery-report','hardware','Laptop battery health report',[],
+'Creates a report on the desktop and opens it. Compare Design Capacity with Full Charge Capacity: below about 60% means the battery is worn out.',
+String.raw`
+powercfg /batteryreport /output "$env:USERPROFILE\Desktop\battery-report.html"
+Start-Process "$env:USERPROFILE\Desktop\battery-report.html"`);
+
+S('problem-devices','hardware','Devices with driver problems',[],
+'The same as yellow warning triangles in Device Manager.',
+String.raw`
+Get-PnpDevice | Where-Object { $_.Status -in 'Error','Degraded' } |
+  Select-Object Class, FriendlyName, Status, InstanceId |
+  Format-Table -AutoSize`);
+
+S('monitors','hardware','Connected monitors: make, model, serial',[],
+'Handy for asset records and for checking Windows actually sees a second screen.',
+String.raw`
+Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID -ErrorAction SilentlyContinue | ForEach-Object {
+  [PSCustomObject]@{
+    Maker  = -join ($_.ManufacturerName | Where-Object { $_ } | ForEach-Object { [char]$_ })
+    Model  = -join ($_.UserFriendlyName | Where-Object { $_ } | ForEach-Object { [char]$_ })
+    Serial = -join ($_.SerialNumberID   | Where-Object { $_ } | ForEach-Object { [char]$_ })
+  }
+} | Format-Table -AutoSize`);
+
+S('audio-devices','hardware','Audio devices (speakers, headsets, mics)',[],
+'Shows every playback and recording device Windows knows about and whether it is working.',
+String.raw`
+Get-PnpDevice -Class AudioEndpoint | Select-Object FriendlyName, Status | Sort-Object FriendlyName | Format-Table -AutoSize`);
+
+S('audio-restart','hardware','Restart the Windows audio service',['admin','changes'],
+'Fixes no sound / red X on the speaker icon more often than you would expect.',
+String.raw`
+Restart-Service Audiosrv -Force
+Get-Service Audiosrv, AudioEndpointBuilder`);
+
+S('bsod-history','hardware','Blue screen history',[],
+'Lists recent bugchecks with their stop codes and any crash dump files. The same stop code repeating points to a driver or hardware fault.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='System'; ProviderName='Microsoft-Windows-WER-SystemErrorReporting' } -MaxEvents 10 -ErrorAction SilentlyContinue |
+  Select-Object TimeCreated, @{n='Message';e={ ($_.Message -split "\r?\n")[0] }} |
+  Format-Table -AutoSize -Wrap
+Get-ChildItem "$env:SystemRoot\Minidump" -ErrorAction SilentlyContinue | Select-Object Name, LastWriteTime`);
+
+S('drivers','hardware','Driver versions and dates',[],
+'Every signed driver with its version and date. Very old display, network or dock drivers are common troublemakers.',
+String.raw`
+Get-CimInstance Win32_PnPSignedDriver | Where-Object DeviceName |
+  Select-Object DeviceName, DriverVersion, @{n='Date';e={ $_.DriverDate.ToString('yyyy-MM-dd') }}, Manufacturer |
+  Sort-Object DeviceName |
+  Format-Table -AutoSize`);
+
+/* ---------------- EVENT LOGS ---------------- */
+S('recent-errors','logs','Critical and error events in the last 24 hours',[],
+'The first line of every System and Application error from the last day. Look for patterns rather than single events.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='System','Application'; Level=1,2; StartTime=(Get-Date).AddHours(-24) } -ErrorAction SilentlyContinue |
+  Select-Object TimeCreated, LogName, ProviderName, Id, @{n='Message';e={ ($_.Message -split "\r?\n")[0] }} |
+  Format-Table -AutoSize -Wrap`);
+
+S('app-crashes','logs','Application crashes (last 7 days)',[],
+'Event 1000. Shows which app crashed and which module (DLL) it crashed in, which often points to the real culprit such as an add-in or AV hook.',
+String.raw`
+Get-WinEvent -FilterHashtable @{ LogName='Application'; Id=1000; StartTime=(Get-Date).AddDays(-7) } -ErrorAction SilentlyContinue |
+  Select-Object TimeCreated,
+    @{n='App';e={ $_.Properties[0].Value }},
+    @{n='FaultingModule';e={ $_.Properties[3].Value }} |
+  Format-Table -AutoSize`);
+
+
+/* ---------------- AWS VPN CLIENT ---------------- */
+S('vpn-version-win','vpn','Which AWS VPN Client version is installed? (Windows)',[],
+'Check this first on any VPN ticket. Most connection and profile faults turn out to be an old client. Version 6.0 changed where profiles live, which is why profiles go missing after that upgrade.',
+String.raw`
+$paths = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+Get-ItemProperty $paths -ErrorAction SilentlyContinue |
+  Where-Object { $_.DisplayName -like '*AWS VPN Client*' } |
+  Select-Object DisplayName, DisplayVersion, InstallDate, InstallLocation, PSChildName |
+  Format-List
+Get-Service | Where-Object { $_.DisplayName -like '*AWS VPN*' } | Select-Object Name, DisplayName, Status`);
+
+S('vpn-logs-win','vpn','Read the AWS VPN Client logs (Windows)',[],
+'Pulls the newest application log, OpenVPN log and service log. The OpenVPN log (ovpn_ prefix) holds the real reason a tunnel failed: TLS errors, auth failures, no route to host.',
+String.raw`
+$userLogs = "$env:APPDATA\AWSVPNClient\logs"
+$svcLogs  = "$env:ProgramData\Amazon\AWSVPNClient\logs"
+foreach ($dir in $userLogs, $svcLogs) {
+  if (Test-Path $dir) {
+    Write-Host ""; Write-Host "===== $dir =====" -ForegroundColor Cyan
+    Get-ChildItem $dir -File | Sort-Object LastWriteTime -Descending | Select-Object -First 3 |
+      ForEach-Object {
+        Write-Host ""; Write-Host "--- $($_.Name)  ($($_.LastWriteTime)) ---" -ForegroundColor Yellow
+        Get-Content $_.FullName -Tail 40
+      }
+  } else { Write-Host "Not found: $dir" }
+}`);
+
+S('vpn-connect-check','vpn','Can this machine reach the VPN endpoint? (uses Computer)',['net'],
+'Put the VPN endpoint hostname (the cvpn-endpoint-... address from the .ovpn file) in the <b>Computer</b> box. AWS Client VPN normally uses UDP 443, with TCP 443 as a fallback, so a resolvable name plus an open TCP 443 is a good sign. Guest and hotel Wi-Fi blocking UDP is a very common cause.',
+String.raw`
+$endpoint = '{{COMPUTER}}'
+Resolve-DnsName $endpoint -ErrorAction SilentlyContinue | Select-Object Name, IPAddress
+Test-NetConnection $endpoint -Port 443
+Write-Host 'Note: the tunnel itself normally runs over UDP 443. TCP 443 open here only proves the host is reachable.' -ForegroundColor Yellow`);
+
+S('vpn-tap-win','vpn','Check the VPN network adapter (Windows)',['admin'],
+'For "No TAP-Windows adapters" or a tunnel that connects then drops. The adapter description should read exactly: AWS VPN Client TAP-Windows Adapter V9. Disabling and re-enabling it clears most stuck states; a missing adapter means a reinstall.',
+String.raw`
+Get-NetAdapter | Where-Object { $_.InterfaceDescription -like '*TAP*' -or $_.Name -like '*AWS*' } |
+  Select-Object Name, InterfaceDescription, Status, MacAddress | Format-Table -AutoSize
+# Reset it (change the name if yours differs):
+# Disable-NetAdapter -Name 'Ethernet 2' -Confirm:$false
+# Start-Sleep 3
+# Enable-NetAdapter  -Name 'Ethernet 2' -Confirm:$false`);
+
+S('vpn-conflicts-win','vpn','Find conflicting VPN or OpenVPN processes (Windows)',[],
+'The AWS client refuses to connect if another OpenVPN process holds the adapter. Catches OpenVPN GUI, OpenVPN Connect, Tunnelblick imports, and other corporate VPN clients left running.',
+String.raw`
+Get-Process | Where-Object { $_.Name -match 'openvpn|vpn|tunnelblick|wireguard|anyconnect|forticlient|globalprotect' } |
+  Select-Object Name, Id, Path, StartTime | Format-Table -AutoSize
+Get-Service | Where-Object { $_.DisplayName -match 'VPN|OpenVPN' } |
+  Select-Object Name, DisplayName, Status | Format-Table -AutoSize`);
+
+S('vpn-saml-port','vpn','SAML sign-in window never opens (Windows)',[],
+'With federated (SSO) authentication the client opens a browser and waits for the reply on a local callback port, normally 127.0.0.1:35001. If something else already holds that port, the browser opens and nothing ever happens. This shows what owns it.',
+String.raw`
+Get-NetTCPConnection -LocalPort 35001 -ErrorAction SilentlyContinue |
+  Select-Object LocalAddress, LocalPort, State, OwningProcess,
+    @{n='Process';e={ (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName }} |
+  Format-Table -AutoSize
+Write-Host 'Nothing listed means the port is free. If another app owns it, close that app and retry the sign-in.'
+Write-Host 'Also check the default browser opens normally and is not blocking the localhost redirect.'`);
+
+S('vpn-profiles-win','vpn','List and back up VPN profiles (Windows)',[],
+'Profiles live in the user profile, not in Program Files, so they survive an ordinary reinstall but not a full wipe. Always run this before updating or reinstalling the client.',
+String.raw`
+$cfg = "$env:USERPROFILE\.config\AWSVPNClient"
+if (Test-Path $cfg) {
+  Get-ChildItem $cfg -Recurse | Select-Object LastWriteTime, Length, FullName | Format-Table -AutoSize
+  if (Test-Path "$cfg\ConnectionProfiles") { Write-Host "--- ConnectionProfiles ---" -ForegroundColor Cyan; Get-Content "$cfg\ConnectionProfiles" }
+  $backup = "$env:USERPROFILE\Desktop\AWSVPNClient-backup-" + (Get-Date -Format 'yyyyMMdd-HHmm')
+  Copy-Item $cfg $backup -Recurse -Force
+  Write-Host ""; Write-Host "Backed up to $backup" -ForegroundColor Green
+} else { Write-Host "No profile folder at $cfg" -ForegroundColor Yellow }`);
+
+S('vpn-clean-reinstall-win','vpn','Clean wipe and reinstall of the AWS VPN Client (Windows)',['admin','changes'],
+'The all-in-one: backs up profiles, closes the client, uninstalls whichever version is installed (it looks the product code up itself), deletes every leftover folder, then installs the new MSI silently and optionally puts the profiles back. <b>Edit the first two lines before running.</b> Download the MSI first from the AWS Client VPN download page.',
+String.raw`
+# ---- SETTINGS -------------------------------------------------------------
+$installer      = 'C:\Temp\AWS_VPN_Client.msi'   # downloaded MSI, or '' to uninstall only
+$restoreProfiles = $true                          # put the user's profiles back afterwards
+# ---------------------------------------------------------------------------
+
+$cfg    = "$env:USERPROFILE\.config\AWSVPNClient"
+$backup = "$env:USERPROFILE\Desktop\AWSVPNClient-backup-" + (Get-Date -Format 'yyyyMMdd-HHmm')
+
+Write-Host '1. Backing up profiles...' -ForegroundColor Cyan
+if (Test-Path $cfg) { Copy-Item $cfg $backup -Recurse -Force; Write-Host "   saved to $backup" }
+else { Write-Host '   no existing profile folder'; $restoreProfiles = $false }
+
+Write-Host '2. Closing the client...' -ForegroundColor Cyan
+Get-Process | Where-Object { $_.Name -match 'AWS VPN Client|awsvpnclient|openvpn' } | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Service | Where-Object { $_.DisplayName -like '*AWS VPN*' } | Stop-Service -Force -ErrorAction SilentlyContinue
+Start-Sleep 3
+
+Write-Host '3. Uninstalling...' -ForegroundColor Cyan
+$paths = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+         'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+$found = Get-ItemProperty $paths -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like '*AWS VPN Client*' }
+if ($found) {
+  foreach ($app in $found) {
+    Write-Host "   removing $($app.DisplayName) $($app.DisplayVersion)"
+    Start-Process msiexec.exe -ArgumentList ('/x ' + $app.PSChildName + ' /qn /norestart') -Wait
+  }
+} else { Write-Host '   nothing installed to remove' }
+
+Write-Host '4. Deleting leftovers...' -ForegroundColor Cyan
+$leftovers = "$env:ProgramFiles\Amazon\AWS VPN Client",
+             ([Environment]::GetFolderPath('ProgramFilesX86') + '\Amazon\AWS VPN Client'),
+             "$env:ProgramData\Amazon\AWSVPNClient",
+             "$env:APPDATA\AWSVPNClient",
+             "$env:LOCALAPPDATA\AWSVPNClient",
+             $cfg
+foreach ($p in $leftovers) {
+  if (Test-Path $p) { Remove-Item $p -Recurse -Force -ErrorAction SilentlyContinue; Write-Host "   removed $p" }
+}
+
+Write-Host '5. Installing...' -ForegroundColor Cyan
+if ($installer -and (Test-Path $installer)) {
+  $log = "$env:TEMP\AWS_VPN_Client-install.log"
+  Start-Process msiexec.exe -ArgumentList ('/i "' + $installer + '" /qn /norestart /L*v "' + $log + '"') -Wait
+  Write-Host "   installed. MSI log: $log"
+} else { Write-Host '   no installer path set, skipping install' -ForegroundColor Yellow }
+
+if ($restoreProfiles -and (Test-Path $backup)) {
+  Write-Host '6. Restoring profiles...' -ForegroundColor Cyan
+  Copy-Item $backup $cfg -Recurse -Force
+  Write-Host '   restored. If the client still shows no profiles, re-import the .ovpn by hand.'
+}
+Write-Host ""; Write-Host "Done. Reboot, then launch the client and test the connection." -ForegroundColor Green`);
+
+S('vpn-routes-win','vpn','What the tunnel is actually doing (Windows)',[],
+'Run while connected. Shows the tunnel adapter, the routes it pushed and the DNS servers in use. If internal names do not resolve, the VPN DNS server is usually missing here.',
+String.raw`
+Get-NetIPConfiguration | Where-Object { $_.NetAdapter.Status -eq 'Up' } |
+  Select-Object InterfaceAlias, @{n='IPv4';e={ $_.IPv4Address.IPAddress -join ', ' }},
+    @{n='DNS';e={ ($_.DNSServer | Where-Object AddressFamily -eq 2 | ForEach-Object ServerAddresses) -join ', ' }} |
+  Format-Table -AutoSize
+Get-NetRoute -AddressFamily IPv4 | Sort-Object RouteMetric |
+  Select-Object -First 20 ifIndex, DestinationPrefix, NextHop, RouteMetric, InterfaceAlias |
+  Format-Table -AutoSize`);
+
+S('vpn-version-mac','vpn','Which AWS VPN Client version is installed? (Mac)',['mac'],
+'Same first question as on Windows. Anything below 6.0 is worth updating, and the jump to 6.0 is the one that moves profiles about.',
+String.raw`
+defaults read "/Applications/AWS VPN Client/AWS VPN Client.app/Contents/Info.plist" CFBundleShortVersionString 2>/dev/null \
+  || defaults read "/Applications/AWS VPN Client.app/Contents/Info.plist" CFBundleShortVersionString 2>/dev/null \
+  || echo "AWS VPN Client not found in /Applications"
+ls -la "/Applications/AWS VPN Client" 2>/dev/null
+pkgutil --pkgs | grep -i -E "vpn|acvc"`);
+
+S('vpn-logs-mac','vpn','Read the AWS VPN Client logs (Mac)',['mac'],
+'Application and OpenVPN logs live in the user folder; the helper daemon logs in /var/log. The ovpn_ log is the one that says why a tunnel failed.',
+String.raw`
+echo "===== ~/.config/AWSVPNClient/logs ====="
+ls -lt ~/.config/AWSVPNClient/logs 2>/dev/null | head -10
+for f in $(ls -t ~/.config/AWSVPNClient/logs/* 2>/dev/null | head -2); do
+  echo; echo "--- $f ---"; tail -40 "$f"
+done
+echo; echo "===== /var/log/AWSVPNClient ====="
+sudo ls -lt /var/log/AWSVPNClient 2>/dev/null | head -10
+sudo tail -40 /var/log/AWSVPNClient/*.log 2>/dev/null`);
+
+S('vpn-profiles-mac','vpn','List and back up VPN profiles (Mac)',['mac'],
+'ConnectionProfiles lists each profile by name and OpenVpnConfigs holds one config per profile. Take this backup before any update or reinstall: after the 6.0 upgrade profiles often need re-importing.',
+String.raw`
+ls -la ~/.config/AWSVPNClient/ 2>/dev/null
+echo; echo "--- OpenVpnConfigs ---"
+ls -la ~/.config/AWSVPNClient/OpenVpnConfigs/ 2>/dev/null
+echo; echo "--- ConnectionProfiles ---"
+cat ~/.config/AWSVPNClient/ConnectionProfiles 2>/dev/null
+echo
+cp -R ~/.config/AWSVPNClient ~/Desktop/AWSVPNClient-backup-$(date +%Y%m%d-%H%M) 2>/dev/null \
+  && echo "Backed up to Desktop"`);
+
+S('vpn-clean-reinstall-mac','vpn','Clean wipe and reinstall of the AWS VPN Client (Mac)',['mac','sudo','changes'],
+'The Mac twin of the Windows wipe-and-reinstall. Backs up profiles, quits the app, unloads the helper daemon, removes the app, its package receipts and every leftover folder, then installs the new .pkg and optionally restores the profiles. <b>Download the .pkg first</b> and check the path on the first line.',
+String.raw`
+#!/bin/bash
+# ---- SETTINGS -------------------------------------------------------------
+PKG="$HOME/Downloads/AWS_VPN_Client.pkg"   # downloaded installer, or "" to remove only
+RESTORE=yes                                 # put the user's profiles back afterwards
+# ---------------------------------------------------------------------------
+BACKUP="$HOME/Desktop/AWSVPNClient-backup-$(date +%Y%m%d-%H%M)"
+
+echo "1. Backing up profiles..."
+if [ -d "$HOME/.config/AWSVPNClient" ]; then
+  cp -R "$HOME/.config/AWSVPNClient" "$BACKUP" && echo "   saved to $BACKUP"
+else
+  echo "   no profile folder found"; RESTORE=no
+fi
+
+echo "2. Quitting the client..."
+osascript -e 'quit app "AWS VPN Client"' 2>/dev/null
+sleep 2
+pkill -f "AWS VPN Client" 2>/dev/null
+pkill -f "acvc" 2>/dev/null
+
+echo "3. Unloading the helper daemon..."
+sudo launchctl bootout system/com.amazonaws.acvc.helper 2>/dev/null
+sudo launchctl unload /Library/LaunchDaemons/com.amazonaws.acvc.helper.plist 2>/dev/null
+
+echo "4. Removing the app and leftovers..."
+sudo rm -rf "/Applications/AWS VPN Client" "/Applications/AWS VPN Client.app"
+sudo rm -rf /var/log/AWSVPNClient
+sudo rm -f  /Library/LaunchDaemons/com.amazonaws.acvc.helper.plist
+sudo rm -rf /Library/Application\ Support/AWSVPNClient
+rm -rf "$HOME/.config/AWSVPNClient"
+rm -rf "$HOME/Library/Application Support/AWSVPNClient"
+rm -rf "$HOME/Library/Caches/com.amazonaws.acvc"* 2>/dev/null
+for p in $(pkgutil --pkgs | grep -i -E "acvc|awsvpn"); do
+  echo "   forgetting receipt $p"; sudo pkgutil --forget "$p" >/dev/null
+done
+
+echo "5. Installing..."
+if [ -n "$PKG" ] && [ -f "$PKG" ]; then
+  xattr -d com.apple.quarantine "$PKG" 2>/dev/null
+  sudo installer -pkg "$PKG" -target / && echo "   installed"
+else
+  echo "   no installer at $PKG, skipping install"
+fi
+
+if [ "$RESTORE" = yes ] && [ -d "$BACKUP" ]; then
+  echo "6. Restoring profiles..."
+  mkdir -p "$HOME/.config"
+  cp -R "$BACKUP" "$HOME/.config/AWSVPNClient"
+  chown -R "$(id -un):staff" "$HOME/.config/AWSVPNClient"
+  echo "   restored. If the app shows no profiles, re-import the .ovpn by hand."
+fi
+echo "Done. Open the client, allow any location or network prompts, then test."`);
+
+S('vpn-ovpn-fix-mac','vpn','.ovpn file greyed out when adding a profile (Mac)',['mac'],
+'The picker only accepts files ending exactly .ovpn. Usually it is a hidden .txt extension, or the file was copied by another admin account and is owned by them or still quarantined. Put the file path in the <b>File</b> box.',
+String.raw`
+F="{{FILE}}"
+ls -l@ "$F"                       # owner, permissions and any quarantine flag
+file "$F"                         # should say ASCII text
+sudo chown "$(id -un):staff" "$F" # take ownership
+chmod 644 "$F"
+xattr -c "$F"                     # clear quarantine
+echo
+echo "If the name ends .ovpn.txt, rename it so it ends .ovpn (Get Info, untick Hide extension)."
+echo "If it sits on an iCloud Desktop, move it to ~/Documents and try again."`);
+
+S('vpn-admin-temp-mac','vpn','"You are not an admin" when deleting a profile (Mac)',['mac','sudo','changes'],
+'Recent clients check for admin rights and simply refuse, without ever prompting for credentials. Grant admin briefly, delete the profile, then take it away again. <b>Always run the last two lines.</b>',
+String.raw`
+U={{USER}}
+sudo dseditgroup -o edit -a $U -t user admin
+echo "Now: quit the AWS VPN Client fully (Cmd+Q), reopen it, delete the profile."
+read -p "Press Enter once the profile has been deleted..."
+sudo dseditgroup -o edit -d $U -t user admin
+dseditgroup -o checkmember -m $U admin`);
+
+S('vpn-helper-mac','vpn','Check the VPN helper daemon (Mac)',['mac','sudo'],
+'For "helper tool" errors and a client that sits at Connecting forever. Shows whether the privileged helper is loaded and running.',
+String.raw`
+sudo launchctl list | grep -i -E "acvc|awsvpn"
+ls -la /Library/LaunchDaemons/ | grep -i -E "acvc|awsvpn"
+ps aux | grep -i -E "acvc|aws vpn" | grep -v grep
+# Reload it:
+# sudo launchctl bootout system/com.amazonaws.acvc.helper 2>/dev/null
+# sudo launchctl bootstrap system /Library/LaunchDaemons/com.amazonaws.acvc.helper.plist`);
+
+S('vpn-conflicts-mac','vpn','Find conflicting VPN processes (Mac)',['mac'],
+'Another OpenVPN process, Tunnelblick or a second VPN client will stop the AWS client connecting. Also shows any active tun interfaces.',
+String.raw`
+ps aux | grep -i -E "openvpn|tunnelblick|wireguard|anyconnect|globalprotect|forticlient" | grep -v grep
+echo; echo "--- tunnel interfaces ---"
+ifconfig | grep -A 3 -E "^utun|^tun"
+echo; echo "--- current default route ---"
+route -n get default 2>/dev/null | grep -E "interface|gateway"`);
+
+/* ---------------- macOS ---------------- */
+S('mac-snapshot','mac','Full Mac snapshot',['mac'],
+'The Mac equivalent of the Windows snapshot: model, serial, chip, RAM, macOS version, uptime, free space and the logged-in user. Good opener for any Mac ticket.',
+String.raw`
+echo "Host:      $(scutil --get ComputerName 2>/dev/null) / $(hostname)"
+echo "User:      $(id -un)"
+echo "macOS:     $(sw_vers -productVersion) (build $(sw_vers -buildVersion))"
+system_profiler SPHardwareDataType | grep -E "Model Name|Model Identifier|Chip|Processor Name|Memory|Serial Number"
+echo "Uptime:   $(uptime)"
+echo "Disk:"
+df -h / | tail -1
+echo "Managed:  $(sudo profiles status -type enrollment 2>/dev/null | tr '\n' ' ')"`);
+
+S('mac-storage','mac','What is filling the disk? (Mac)',['mac'],
+'Free space first, then the biggest folders in the home directory. On Macs the usual culprits are Downloads, a huge Mail or Photos library, Xcode caches and old iOS backups.',
+String.raw`
+df -h /
+echo; echo "--- biggest folders in $HOME ---"
+du -sh ~/* ~/Library 2>/dev/null | sort -hr | head -15
+echo; echo "--- biggest items in ~/Library ---"
+du -sh ~/Library/* 2>/dev/null | sort -hr | head -10
+echo; echo "--- purgeable / snapshots ---"
+tmutil listlocalsnapshots / 2>/dev/null`);
+
+S('mac-top','mac','Top processes by CPU and memory (Mac)',['mac'],
+'What is actually working the machine. kernel_task high on an Intel Mac usually means it is throttling because it is hot.',
+String.raw`
+echo "--- top 10 by CPU ---"
+ps -Ao pcpu,pmem,pid,comm -r | head -11
+echo; echo "--- top 10 by memory ---"
+ps -Ao pmem,pcpu,pid,comm -m | head -11
+echo; echo "--- memory pressure ---"
+memory_pressure 2>/dev/null | tail -5`);
+
+S('mac-network','mac','Network overview (Mac)',['mac'],
+'Which service is actually in use, its IP, the router, and the DNS servers really being used. A 169.254.x.x address means DHCP failed. Run this before anything else on a Mac network ticket, especially when a dock is involved.',
+String.raw`
+echo "--- network services in order of priority ---"
+networksetup -listnetworkserviceorder
+echo; echo "--- active interfaces ---"
+for i in $(ifconfig -l); do
+  ip=$(ipconfig getifaddr $i 2>/dev/null)
+  [ -n "$ip" ] && echo "$i  $ip"
+done
+echo; echo "--- default route ---"
+route -n get default 2>/dev/null | grep -E "gateway|interface"
+echo; echo "--- DNS actually in use ---"
+scutil --dns | grep -E "nameserver|search domain" | sort -u`);
+
+S('mac-dns-set','mac','Set DNS on the right network service (Mac)',['mac','sudo','changes'],
+'For domain-joined Macs: DNS must point at the domain controller only, with no public resolver as a secondary, or AD lookups fail intermittently. Set it on the service actually in use, including each dock Ethernet adapter. Put the DC IP in the <b>Computer</b> box and the domain in the <b>Domain</b> box.',
+String.raw`
+networksetup -listallnetworkservices
+echo
+# Show what each service currently has:
+networksetup -listallnetworkservices | tail -n +2 | while read -r svc; do
+  echo "$svc: $(networksetup -getdnsservers "$svc" 2>/dev/null | tr '\n' ' ')"
+done
+echo
+echo "To set it (edit the service name to match exactly, quotes included):"
+echo '  sudo networksetup -setdnsservers "Wi-Fi" {{COMPUTER}}'
+echo '  sudo networksetup -setsearchdomains "Wi-Fi" {{DOMAIN}}'
+echo "Repeat for every dock adapter listed above. Then flush the cache."`);
+
+S('mac-dns-flush','mac','Flush DNS cache (Mac)',['mac','sudo','changes'],
+'Safe and instant. Run after any DNS change or when a name resolves to a stale address.',
+String.raw`
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+echo "DNS cache flushed."`);
+
+S('mac-dns-home','mac','Wi-Fi works in the office but not at home: reset DNS to automatic',['mac','sudo','changes'],
+'The fix for a Mac that gets on the home Wi-Fi but loads nothing. Hard-coded office DNS (the domain controller) is unreachable from home, so every name fails while the Wi-Fi itself looks perfectly connected. Setting DNS and search domains back to <b>Empty</b> hands control back to the home router. If you are sitting in the user\'s own session, run the su script first or sudo will refuse.',
+String.raw`
+# What it is set to now
+networksetup -getdnsservers "Wi-Fi"
+networksetup -getsearchdomains "Wi-Fi"
+
+# Hand DNS back to the router (Empty is the keyword that clears it)
+sudo networksetup -setdnsservers "Wi-Fi" Empty
+sudo networksetup -setsearchdomains "Wi-Fi" Empty
+sudo killall -HUP mDNSResponder
+
+# Confirm: both should now say "There aren't any DNS Servers set"
+networksetup -getdnsservers "Wi-Fi"
+scutil --dns | grep nameserver | sort -u
+ping -c 2 bbc.co.uk`);
+
+S('mac-dns-home-all','mac','Reset DNS to automatic on every network service (Mac)',['mac','sudo','changes'],
+'Same fix, but for every service at once rather than just Wi-Fi. Use it when the Mac has been on a dock, because the old DNS is usually still sat on the dock\'s Ethernet adapter and comes back the moment they plug in. It skips nothing, so it clears Wi-Fi, Ethernet, iPhone USB and any VPN service.',
+String.raw`
+networksetup -listallnetworkservices | tail -n +2 | while read -r svc; do
+  echo "--- $svc"
+  echo "    before: $(networksetup -getdnsservers "$svc" 2>/dev/null | tr '\n' ' ')"
+  sudo networksetup -setdnsservers "$svc" Empty 2>/dev/null
+  sudo networksetup -setsearchdomains "$svc" Empty 2>/dev/null
+  echo "    after:  $(networksetup -getdnsservers "$svc" 2>/dev/null | tr '\n' ' ')"
+done
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+echo
+echo "All services back to automatic. Test with: ping -c 2 bbc.co.uk"`);
+
+S('mac-dns-office','mac','Put the office DNS back (Mac)',['mac','sudo','changes'],
+'The reverse of the home fix, for when the Mac comes back on site or onto the VPN. Domain controller in the <b>Computer</b> box, domain in the <b>Domain</b> box. Set it on the service actually in use, and on each dock adapter if they use one.',
+String.raw`
+sudo networksetup -setdnsservers "Wi-Fi" {{COMPUTER}}
+sudo networksetup -setsearchdomains "Wi-Fi" {{DOMAIN}}
+sudo killall -HUP mDNSResponder
+
+networksetup -getdnsservers "Wi-Fi"
+networksetup -getsearchdomains "Wi-Fi"
+dig +short -t SRV _ldap._tcp.dc._msdcs.{{DOMAIN}}
+echo "An SRV result above means the Mac can see the domain again."`);
+
+S('mac-wifi-join','mac','Join a Wi-Fi network from Terminal (Mac)',['mac','changes'],
+'For when the user cannot get the menu bar to cooperate, or you are working blind over a remote session. It joins the network and saves it to the preferred list. Leave the password off the line and it prompts instead, which keeps it out of the shell history.',
+String.raw`
+IF=$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $2}')
+echo "Wi-Fi interface: $IF"
+networksetup -setairportpower "$IF" on
+
+# Networks in range
+networksetup -listpreferredwirelessnetworks "$IF"
+
+# Join (you will be prompted for the password)
+read -p "Network name (SSID): " SSID
+read -s -p "Wi-Fi password: " PW; echo
+networksetup -setairportnetwork "$IF" "$SSID" "$PW"
+sleep 5
+echo "Now on: $(networksetup -getairportnetwork $IF)"
+echo "Address: $(ipconfig getifaddr $IF)"`);
+
+S('mac-su-admin','mac','Become an admin inside the user\'s session (su)',['mac'],
+'Read this before running any sudo command while logged in as the user. Their standard account is not in the sudoers list, so sudo just refuses. Switch to an admin account first with su, do the work, then exit back.',
+String.raw`
+# 1. Check whether the account you are sitting in can use sudo at all
+id -un
+dseditgroup -o checkmember -m "$(id -un)" admin
+
+# 2. If it says NOT a member, switch to a local admin (you need that password)
+su - localadmin
+#    (replace localadmin with the actual local admin account on that Mac)
+# ...the prompt changes to the admin account. Now run the sudo commands:
+#    sudo networksetup -setdnsservers "Wi-Fi" Empty
+#    sudo networksetup -setsearchdomains "Wi-Fi" Empty
+#    sudo killall -HUP mDNSResponder
+
+# 3. Back to the user's session when you are done
+exit
+id -un`);
+
+S('mac-dns-test','mac','Test DNS and domain controller lookups (Mac)',['mac'],
+'Checks the domain in the <b>Domain</b> box resolves and that its domain controllers are advertised. If the SRV lookup comes back empty, the Mac is asking the wrong DNS server, and nothing AD-related will work.',
+String.raw`
+echo "--- A record ---"
+dig +short {{DOMAIN}}
+echo "--- domain controllers (SRV) ---"
+dig +short -t SRV _ldap._tcp.dc._msdcs.{{DOMAIN}}
+dig +short -t SRV _kerberos._tcp.{{DOMAIN}}
+echo "--- reachability of the DC in the Computer box ---"
+ping -c 2 {{COMPUTER}}
+nc -vz {{COMPUTER}} 389 2>&1
+nc -vz {{COMPUTER}} 88 2>&1`);
+
+S('mac-wifi','mac','Wi-Fi details and signal (Mac)',['mac','sudo'],
+'SSID, channel, band, signal (RSSI) and noise. RSSI worse than about -70 dBm explains dropouts and poor call quality. wdutil is the modern command and needs sudo; the system_profiler fallback works without it.',
+String.raw`
+sudo wdutil info 2>/dev/null | grep -E "SSID|BSSID|RSSI|Noise|Channel|Tx Rate|Security|MAC Address" \
+  || system_profiler SPAirPortDataType | sed -n '/Current Network/,/Other Local/p'
+echo; echo "--- saved networks ---"
+networksetup -listpreferredwirelessnetworks "$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $2}')" 2>/dev/null | head -20`);
+
+S('mac-wifi-reset','mac','Reconnect Wi-Fi / renew the lease (Mac)',['mac','changes'],
+'Cycles the Wi-Fi interface and renews DHCP. Fixes an APIPA (169.254) address and a lot of "connected but no internet" cases without a reboot.',
+String.raw`
+IF=$(networksetup -listallhardwareports | awk '/Wi-Fi/{getline; print $2}')
+echo "Wi-Fi interface: $IF"
+networksetup -setairportpower "$IF" off
+sleep 5
+networksetup -setairportpower "$IF" on
+sleep 5
+sudo ipconfig set "$IF" DHCP
+sleep 3
+echo "New address: $(ipconfig getifaddr $IF)"`);
+
+S('mac-public-ip','mac','Public IP and who owns an address (Mac)',['mac','net'],
+'The Mac version of the ipinfo lookup. First line is this machine\'s public IP; second looks up whatever is in the <b>IP</b> box.',
+String.raw`
+curl -s https://ipinfo.io/json
+echo
+curl -s https://ipinfo.io/{{IP}}/json
+echo`);
+
+S('mac-connections','mac','Live network connections with owning app (Mac)',['mac'],
+'The Mac equivalent of the connection triage table: every established connection and the process behind it. Pipe an unfamiliar address through the ipinfo lookup.',
+String.raw`
+lsof -nP -i TCP -s TCP:ESTABLISHED 2>/dev/null | awk 'NR==1 || $0 !~ /127.0.0.1|\[::1\]/' | head -40`);
+
+S('mac-port-test','mac','Test a host and port (Mac)',['mac','net'],
+'Uses the <b>Computer</b> box. Change 443 for the port you need: 445 file shares, 389 LDAP, 3389 RDP, 5900 screen sharing.',
+String.raw`
+nc -vz {{COMPUTER}} 443
+ping -c 3 {{COMPUTER}}
+traceroute -m 15 {{COMPUTER}}`);
+
+S('mac-app-quarantine','mac','"App is damaged" or blocked by Gatekeeper',['mac','sudo','changes'],
+'Clears the quarantine flag that macOS puts on downloaded apps. Only do this for software you know is legitimate and from the right source. Put the app path in the <b>File</b> box, for example /Applications/Name.app',
+String.raw`
+xattr -l "{{FILE}}"
+sudo xattr -dr com.apple.quarantine "{{FILE}}"
+codesign -dv --verbose=2 "{{FILE}}" 2>&1 | grep -E "Authority|Identifier|TeamIdentifier"
+spctl -a -vv "{{FILE}}" 2>&1`);
+
+S('mac-app-wipe','mac','Remove an app and all its data, then reinstall (Mac)',['mac','sudo','changes'],
+'The generic wipe-and-reinstall for any Mac app: quits it, removes the app, then clears its preferences, caches, application support and logs, and forgets the package receipt. Put the app name in the <b>App</b> box. <b>Read the list it prints before letting it delete.</b>',
+String.raw`
+APP="{{APP}}"
+echo "Looking for anything belonging to: $APP"
+osascript -e "quit app \"$APP\"" 2>/dev/null
+sleep 2
+pkill -f "$APP" 2>/dev/null
+
+echo; echo "--- app bundle ---"
+ls -d "/Applications/$APP.app" 2>/dev/null
+echo "--- support files ---"
+ls -d ~/Library/Application\ Support/*"$APP"* ~/Library/Preferences/*"$APP"* \
+      ~/Library/Caches/*"$APP"* ~/Library/Logs/*"$APP"* \
+      ~/Library/Saved\ Application\ State/*"$APP"* 2>/dev/null
+echo "--- package receipts ---"
+pkgutil --pkgs | grep -i "$APP"
+
+echo
+read -p "Delete all of the above? (yes/no) " ANSWER
+if [ "$ANSWER" = yes ]; then
+  sudo rm -rf "/Applications/$APP.app"
+  rm -rf ~/Library/Application\ Support/*"$APP"* ~/Library/Preferences/*"$APP"* \
+         ~/Library/Caches/*"$APP"* ~/Library/Logs/*"$APP"* \
+         ~/Library/Saved\ Application\ State/*"$APP"* 2>/dev/null
+  for p in $(pkgutil --pkgs | grep -i "$APP"); do sudo pkgutil --forget "$p" >/dev/null; done
+  echo "Removed. Now install the fresh copy:"
+  echo '  sudo installer -pkg ~/Downloads/installer.pkg -target /'
+  echo '  or drag the new .app into /Applications'
+else
+  echo "Nothing deleted."
+fi`);
+
+S('mac-app-crash','mac','Recent app crashes (Mac)',['mac'],
+'Crash reports with the newest first. The top few lines of a report name the app, the version and the reason.',
+String.raw`
+ls -lt ~/Library/Logs/DiagnosticReports/ 2>/dev/null | head -15
+echo; echo "--- newest report ---"
+head -30 "$(ls -t ~/Library/Logs/DiagnosticReports/* 2>/dev/null | head -1)" 2>/dev/null
+echo; echo "--- system-wide crash log entries in the last hour ---"
+log show --last 1h --predicate 'eventMessage CONTAINS "crash"' --style compact 2>/dev/null | tail -20`);
+
+S('mac-restart-ui','mac','Restart Finder, Dock and the menu bar (Mac)',['mac','changes'],
+'The Mac equivalent of restarting Explorer. Fixes a frozen Dock, a stuck menu bar or a Finder that will not refresh. Open windows close, nothing is lost.',
+String.raw`
+killall Finder
+killall Dock
+killall SystemUIServer
+echo "Finder, Dock and menu bar restarted."`);
+
+S('mac-printers','mac','Printers and print queue (Mac)',['mac'],
+'Lists printers, the default, and anything stuck in a queue. The last line clears every job on every printer.',
+String.raw`
+lpstat -p -d
+echo; echo "--- jobs waiting ---"
+lpstat -o
+echo; echo "--- re-enable any paused printer ---"
+for p in $(lpstat -p | awk '/disabled/ {print $2}'); do cupsenable "$p" && echo "re-enabled $p"; done
+# Clear every job:
+# cancel -a -x`);
+
+S('mac-printer-reset','mac','Reset the whole printing system (Mac)',['mac','sudo','changes'],
+'The big hammer: removes every printer and queue so they can be added fresh. Equivalent to right-clicking the printer list and choosing Reset printing system. Warn the user first, they will need their printers adding back.',
+String.raw`
+lpstat -p | awk '{print $2}' > ~/Desktop/printers-before-reset.txt
+echo "Current printers saved to Desktop."
+sudo cupsctl --no-debug-logging
+for p in $(lpstat -p | awk '{print $2}'); do sudo lpadmin -x "$p" && echo "removed $p"; done
+sudo rm -rf /var/spool/cups/c0* 2>/dev/null
+sudo killall -HUP cupsd 2>/dev/null
+echo "Done. Add the printers back in System Settings, Printers and Scanners."`);
+
+S('mac-updates','mac','Check for and install macOS updates',['mac','sudo','changes'],
+'Lists available updates, then the commented line installs everything and restarts if needed. Big updates take a long time, so do not start one at the end of a call.',
+String.raw`
+softwareupdate -l
+# Install everything (will restart if required):
+# sudo softwareupdate -ia --restart
+# Just one item:
+# sudo softwareupdate -i "Name exactly as listed above"`);
+
+S('mac-mdm','mac','MDM enrolment and configuration profiles (Mac)',['mac','sudo'],
+'Shows whether the Mac is managed and which profiles are applied. If an app keeps coming back or a setting will not stick, a profile is usually why.',
+String.raw`
+sudo profiles status -type enrollment
+echo; echo "--- installed profiles ---"
+sudo profiles list -all 2>/dev/null | head -40
+echo; echo "--- MDM client ---"
+ls -la /Library/LaunchDaemons/ | grep -i -E "jamf|intune|kandji|mosyle|addigy"`);
+
+S('mac-battery','mac','Battery health (Mac)',['mac'],
+'Cycle count and condition. Condition "Service Recommended" or a very high cycle count means the battery is due for replacement.',
+String.raw`
+system_profiler SPPowerDataType | grep -E "Cycle Count|Condition|Maximum Capacity|Full Charge Capacity|State of Charge|Charging"
+pmset -g batt`);
+
+S('mac-disk-health','mac','Disk check and First Aid (Mac)',['mac','sudo'],
+'Lists the disks, then verifies the boot volume. Verify is read-only and safe to run while the user is working; repair needs Recovery mode.',
+String.raw`
+diskutil list
+echo
+diskutil info / | grep -E "Volume Name|File System|SMART|Read-Only|Container"
+echo; echo "--- verify (read-only) ---"
+sudo diskutil verifyVolume /`);
+
+S('mac-time','mac','Fix clock skew (Mac)',['mac','sudo','changes'],
+'A wrong clock breaks Kerberos, AD logins and SSO with confusing errors. This resyncs against the time server.',
+String.raw`
+sudo systemsetup -getusingnetworktime
+sudo systemsetup -getnetworktimeserver
+sudo sntp -sS time.apple.com
+date
+# Point it at the domain controller instead:
+# sudo systemsetup -setnetworktimeserver {{COMPUTER}}
+# sudo systemsetup -setusingnetworktime on`);
+
+S('mac-sharing','mac','Turn on Screen Sharing for remote support (Mac)',['mac','sudo','changes'],
+'Enables Remote Management so you can connect from another Mac with Screen Sharing (vnc://hostname). Only do this with the user\'s knowledge, and check company policy first.',
+String.raw`
+sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
+  -activate -configure -access -on -restart -agent -privs -all
+echo "Screen Sharing on. Connect to: vnc://$(ipconfig getifaddr en0 2>/dev/null)"
+# Turn it off again:
+# sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop`);
+
+/* ---------------- macOS ACCOUNTS & DOMAIN ---------------- */
+S('macad-bind-status','macad','Is this Mac bound to the domain?',['mac'],
+'dsconfigad -show is the first check for a red dot at the login window. Empty output means the Mac is not bound at all. Check the domain and the computer account name match what you expect in AD.',
+String.raw`
+dsconfigad -show
+echo; echo "--- directory nodes ---"
+dscl localhost -list /Active\ Directory 2>/dev/null
+dscl localhost -list / 2>/dev/null
+echo; echo "--- search path (should list the domain) ---"
+dscl /Search -read / CSPSearchPath 2>/dev/null`);
+
+S('macad-node-test','macad','Can the Mac see the directory right now?',['mac'],
+'If the bind looks fine but logins fail, this tells you whether the AD node is actually answering. The <b>User</b> box is the account to look up.',
+String.raw`
+id {{USER}}@{{DOMAIN}} 2>&1
+echo
+dscacheutil -q user -a name {{USER}}
+echo
+dscl "/Active Directory/$(echo {{DOMAIN}} | cut -d. -f1 | tr '[:lower:]' '[:upper:]')/All Domains" -read /Users/{{USER}} 2>&1 | head -20`);
+
+S('macad-user-record','macad','Check a local account can log in offline',['mac','sudo'],
+'The one that catches out mobile accounts. <b>Run it with sudo</b>: without sudo it silently reports "No such key" even on a healthy account. You want AuthenticationAuthority to contain LocalCachedUser and a ShadowHash entry. If it does not, the password was never cached and the user cannot log in without the network.',
+String.raw`
+sudo dscl . -read /Users/{{USER}} AuthenticationAuthority
+echo
+sudo dscl . -read /Users/{{USER}} NFSHomeDirectory UniqueID PrimaryGroupID RecordName
+echo
+echo "Want: ;LocalCachedUser; and ;ShadowHash; in the list above."`);
+
+S('macad-mobile-account','macad','Recreate a mobile (cached) account',['mac','sudo','changes'],
+'Creates the cached local account so the user can log in without the VPN or network. The -P flag prompts for the password to cache. <b>When it asks for a SecureToken admin, type a local admin username rather than leaving it blank</b>, otherwise it fails.',
+String.raw`
+/System/Library/CoreServices/ManagedClient.app/Contents/Resources/createmobileaccount \
+  -n {{USER}} -h /Users/{{USER}} -P -v
+echo
+echo "Then confirm the cached credentials exist:"
+echo "  sudo dscl . -read /Users/{{USER}} AuthenticationAuthority"`);
+
+S('macad-rebind','macad','Rebind the Mac to the domain',['mac','sudo','changes'],
+'For a broken trust or a missing AD keychain entry. Needs line of sight to a domain controller, so connect the VPN first. Edit the computer name and OU before running. This removes and re-adds the computer account.',
+String.raw`
+# Check what it currently thinks:
+dsconfigad -show
+
+# Leave the domain (asks for a domain admin that can remove the computer account):
+sudo dsconfigad -remove -force -u domainadmin   # <-- your AD account that can remove computer objects
+
+# Rejoin (edit computer name and OU to match your AD):
+sudo dsconfigad -add {{DOMAIN}} \
+  -computer "$(scutil --get ComputerName)" \
+  -username domainadmin \
+  -ou "CN=Computers,DC=$(echo {{DOMAIN}} | sed 's/\./,DC=/g')" \
+  -mobile enable -mobileconfirm disable -localhome enable -useuncpath disable \
+  -shell /bin/zsh -force
+
+# Put the domain back in the search path:
+sudo dsconfigad -alldomains enable
+dsconfigad -show`);
+
+S('macad-keychain-trust','macad','Check the AD computer password in the System keychain',['mac','sudo'],
+'A missing computer account password (error -25300) breaks domain trust even though the bind looks healthy. If nothing comes back here, rebinding is the fix.',
+String.raw`
+sudo security find-generic-password -s "/Active Directory/$(echo {{DOMAIN}} | cut -d. -f1 | tr '[:lower:]' '[:upper:]')" /Library/Keychains/System.keychain 2>&1 | head -10
+echo
+sudo security dump-keychain /Library/Keychains/System.keychain 2>/dev/null | grep -i -A 2 "Active Directory" | head -20`);
+
+S('macad-securetoken','macad','SecureToken status and how to grant it',['mac','sudo','changes'],
+'Without a SecureToken the user cannot unlock a FileVault Mac and cannot be added to FileVault. Granting it needs an admin who already has one (usually the local admin account).',
+String.raw`
+sysadminctl -secureTokenStatus {{USER}}
+echo; echo "--- who has a token ---"
+for u in $(dscl . -list /Users | grep -v '^_' | grep -v -E "daemon|nobody|root"); do
+  printf "%-20s " "$u"; sysadminctl -secureTokenStatus "$u" 2>&1 | sed 's/.*SecureToken //'
+done
+echo
+echo "Grant it (prompts for both passwords):"
+echo "  sysadminctl -adminUser localadmin -adminPassword - -secureTokenOn {{USER}} -password -"`);
+
+S('macad-filevault','macad','FileVault users: check and add',['mac','sudo','changes'],
+'A user who is not a FileVault unlock user cannot get past the pre-boot screen, so the Mac looks like it will not accept their password after a restart. Adding them needs an existing FileVault-enabled admin.',
+String.raw`
+fdesetup status
+echo; echo "--- users who can unlock at boot ---"
+sudo fdesetup list
+echo
+echo "Add the user (asks for an enabled admin, then the user's password):"
+echo "  sudo fdesetup add -usertoadd {{USER}}"`);
+
+S('macad-admin-toggle','macad','Grant or remove local admin rights (Mac)',['mac','sudo','changes'],
+'Useful for apps that demand admin but never prompt. Grant it, do the job, take it away, and confirm. The check line should say the user is NOT a member when you are finished.',
+String.raw`
+dseditgroup -o checkmember -m {{USER}} admin
+# Grant:
+# sudo dseditgroup -o edit -a {{USER}} -t user admin
+# Remove:
+# sudo dseditgroup -o edit -d {{USER}} -t user admin
+echo; echo "--- everyone in the admin group ---"
+dscl . -read /Groups/admin GroupMembership`);
+
+S('macad-local-users','macad','List local accounts on the Mac',['mac'],
+'Real user accounts only, with their home folders, plus which are mobile (domain) accounts.',
+String.raw`
+dscl . -list /Users | grep -v '^_' | grep -v -E "daemon|nobody|root"
+echo; echo "--- with home folders and IDs ---"
+dscl . -list /Users UniqueID | awk '$2 >= 500'
+echo; echo "--- mobile (cached domain) accounts ---"
+for u in $(dscl . -list /Users UniqueID | awk '$2 >= 500 {print $1}'); do
+  if sudo dscl . -read /Users/$u AuthenticationAuthority 2>/dev/null | grep -q LocalCachedUser; then echo "$u  (mobile)"; fi
+done`);
+
+S('macad-password-reset','macad','Reset a local Mac password',['mac','sudo','changes'],
+'For a local (non-domain) account whose password is forgotten. It will warn about the keychain: the user\'s login keychain keeps the old password and will prompt until they update or reset it.',
+String.raw`
+sysadminctl -resetPasswordFor {{USER}} -newPassword -
+echo
+echo "If they then get repeated keychain prompts, in their own session:"
+echo "  Open Keychain Access, right-click the login keychain, Change Password"
+echo "  or reset it: rm -rf ~/Library/Keychains/login.keychain-db  (loses saved passwords)"`);
+
+S('macad-keychain-fix','macad','Endless password prompts: keychain (Mac)',['mac','changes'],
+'Run in the affected user\'s own session. Lists the login keychain, then the commented line resets it, which clears every saved password including Wi-Fi and app logins. Use it only after Change Password has failed.',
+String.raw`
+security list-keychains
+security default-keychain
+ls -la ~/Library/Keychains/
+echo
+echo "Try first: Keychain Access, right-click login keychain, Change Password for Keychain login."
+echo "Last resort (loses all saved passwords):"
+echo "  mv ~/Library/Keychains/login.keychain-db ~/Desktop/login.keychain-db.old"
+echo "  then log out and back in"`);
+
+S('macad-vpn-domain-check','macad','Full domain login health check (Mac)',['mac','sudo'],
+'Runs the whole chain in one go: DNS, DC reachability, bind status, the AD node, the cached credentials and FileVault. Best single thing to run on a "red dot at login" Mac before changing anything.',
+String.raw`
+echo "===== 1. DNS ====="
+scutil --dns | grep -E "nameserver|search domain" | sort -u
+dig +short -t SRV _ldap._tcp.dc._msdcs.{{DOMAIN}}
+
+echo; echo "===== 2. DC reachable ====="
+ping -c 2 {{COMPUTER}} | tail -3
+nc -vz {{COMPUTER}} 389 2>&1
+
+echo; echo "===== 3. Bind ====="
+dsconfigad -show | grep -E "Active Directory Domain|Computer Account"
+
+echo; echo "===== 4. Directory answering ====="
+id {{USER}}@{{DOMAIN}} 2>&1 | head -2
+
+echo; echo "===== 5. Cached credentials ====="
+sudo dscl . -read /Users/{{USER}} AuthenticationAuthority 2>&1 | tr ';' '\n' | grep -E "LocalCachedUser|ShadowHash" || echo "MISSING - user cannot log in offline"
+
+echo; echo "===== 6. SecureToken and FileVault ====="
+sysadminctl -secureTokenStatus {{USER}} 2>&1
+fdesetup status
+sudo fdesetup list 2>/dev/null | grep -i {{USER}} || echo "{{USER}} is NOT a FileVault unlock user"`);
+
+/* ============================================================
+   GUIDES   —   [[script-id]] becomes a clickable chip
+   ============================================================ */
+const GUIDES = [
+{id:'g-slow', title:'PC is slow', sub:'Sluggish, freezing, takes ages to open things',
+ steps:[
+  'Ask what "slow" means: slow to boot, slow all the time, one app slow, or slow since a certain day. It changes where you look.',
+  'Check uptime. A huge number of slow PCs have not been restarted in weeks. [[uptime]] [[pending-reboot]]',
+  'Open Task Manager (Ctrl + Shift + Esc) and go to Performance. Watch CPU, Memory and Disk for a minute of normal use. Memory above about 85% means RAM pressure. Disk pinned at 100% with low speeds suggests a failing or old drive, or an AV scan.',
+  'Find the culprit processes. [[top-cpu]] [[top-mem]]',
+  'Check free space. Under 10% free on C: will slow everything down. [[disk-space]] [[clear-temp]] [[big-folders]]',
+  'Review startup apps in Task Manager > Startup apps and disable non-essentials. Never disable security, VPN or management agents. [[startup-items]]',
+  'Check disk health and power plan. [[disk-health]] [[power-plan]]',
+  'If Windows itself is acting odd, repair system files. [[sfc-dism]]',
+  'Run perfmon /rel (Reliability Monitor) to see crashes and failed updates on a timeline.',
+  'If the hardware is simply underpowered (spinning HDD, 8 GB RAM with heavy use), raise it for an upgrade or replacement rather than chasing software fixes.'
+ ]},
+{id:'g-internet', title:'No internet / network not working', sub:'No connection, limited connectivity, some sites fail',
+ steps:[
+  'Is it just this PC or everyone nearby? If everyone, it is the network, not the machine: escalate to networks.',
+  'Check the basics: cable seated, Wi-Fi on, airplane mode off, docking station lights on.',
+  'Look at the IP address. A 169.254.x.x address means DHCP failed. No gateway means no route out. [[net-overview]]',
+  'Test in stages: gateway, then an internal server, then the internet. [[test-port]] [[traceroute]]',
+  'If names do not resolve but IPs work, it is DNS. [[dns-lookup]] [[flush-dns]]',
+  'If some apps work and others do not, check the proxy. [[proxy-check]]',
+  'On Wi-Fi, check the signal and band. [[wifi-info]]',
+  'Still stuck? Reset the network stack and reboot. Not over a remote session: you will lose the connection. [[net-reset]]',
+  'Check Device Manager for a network adapter with a warning and update or reinstall its driver. [[problem-devices]]'
+ ]},
+{id:'g-print', title:'Can\'t print / jobs stuck in queue', sub:'Nothing comes out, printer offline, wrong printer',
+ steps:[
+  'Check the printer itself: on, paper, toner, no error on its screen, network cable in.',
+  'See what the queue looks like. One job in Error often blocks everything behind it. [[print-jobs]]',
+  'Restart the spooler and clear stuck jobs. Fixes most cases. [[clear-spooler]]',
+  'Print a test page from Windows to separate app problems from printer problems. [[test-page]]',
+  'Check the printer is still reachable by name or IP. [[test-port]] (change the port to 9100 or 443)',
+  'If the wrong printer keeps being picked, stop Windows managing the default. [[default-printer]]',
+  'Remove and re-add the printer. [[list-printers]] [[add-printer]]',
+  'If lots of users are affected, it is the print server or the printer, not the PCs.'
+ ]},
+{id:'g-teams', title:'Teams not working', sub:'Won\'t load, can\'t sign in, no audio or video, missing chats',
+ steps:[
+  'Fully quit Teams (right-click the tray icon > Quit) and reopen. Check the web version at teams.microsoft.com: if that works, the problem is the desktop app.',
+  'Clear the Teams cache. This fixes the majority of Teams problems. [[teams-cache]]',
+  'No audio or mic: in Teams go to Settings > Devices and pick the right speaker and mic. Check Windows Settings > Privacy > Microphone is allowed. [[audio-devices]] [[audio-restart]]',
+  'No camera: check the privacy shutter or function key, and Windows Settings > Privacy > Camera.',
+  'Keeps asking for a password: check SSO and clear cached credentials. [[dsreg]] [[office-creds]]',
+  'Poor call quality: check Wi-Fi signal and whether the VPN is routing Teams traffic. [[wifi-info]] [[conn-owners]]',
+  'As a last resort, uninstall Teams from Settings > Apps, reboot and reinstall.'
+ ]},
+{id:'g-outlook', title:'Outlook problems', sub:'Won\'t open, disconnected, search broken, password prompts',
+ steps:[
+  'Check the status bar at the bottom: "Disconnected" or "Working offline" (Send/Receive > Work Offline toggles it).',
+  'Try Outlook on the web (outlook.office.com). If mail is there, the problem is local.',
+  'Won\'t open or crashes: start in Safe Mode to rule out add-ins. [[outlook-safe]]',
+  '"Cannot open the Outlook window": reset the navigation pane. [[outlook-reset-nav]]',
+  'Missing or corrupt mail, search broken: rebuild the OST. Close Outlook, rename the .ost to .old, reopen. [[ost-folder]]',
+  'Endless password prompts: clear cached credentials and check SSO. [[office-creds]] [[dsreg]]',
+  'Still broken: run an Office Quick Repair, then Online Repair if needed. [[office-repair]]',
+  'Check Office is up to date. [[office-update]]'
+ ]},
+{id:'g-locked', title:'Account locked out / can\'t log in', sub:'Locked, expired password, keeps locking again',
+ steps:[
+  'Check the account state: locked, disabled, or password expired? [[ad-user]] [[net-user]]',
+  'Unlock it. [[ad-unlock]]',
+  'If it locks again within minutes, something is using an old password. Find the source machine. [[lockout-source]]',
+  'Common culprits: phone or tablet mail app, a mapped drive with saved credentials, a disconnected RDP session, a scheduled task, or saved credentials in Credential Manager. [[cred-list]]',
+  'If the password was reset while the laptop was off the network, connect to the office or VPN, lock the screen (Windows + L) and unlock with the new password so the cached password updates.',
+  'Verify identity properly before any password reset, especially over the phone.'
+ ]},
+{id:'g-trust', title:'"Trust relationship ... failed"', sub:'The workstation lost its domain trust',
+ steps:[
+  'Log in with a local admin account, or unplug the network cable and log in with cached credentials.',
+  'Plug back in, open PowerShell as admin and test the secure channel. [[secure-channel]]',
+  'If it returns False, run the repair line with a domain admin account. No rejoin or reboot needed in most cases.',
+  'If repair fails, remove from domain to a workgroup, reboot, rejoin the domain, reboot. User profiles are kept.',
+  'Common cause: the machine was restored from an old image or snapshot, or was off the network for a very long time.'
+ ]},
+{id:'g-suspicious', title:'Suspicious process or connection', sub:'Unknown process, odd traffic, possible compromise',
+ steps:[
+  'Do not kill the process or delete files yet. That destroys evidence. Note the time, PID and anything you have seen.',
+  'Inspect the process: path, signature, parent and command line. Put its name in the Process box. [[proc-inspect]]',
+  'Red flags: runs from AppData, Temp, ProgramData or Public; signature not Valid; parent is an Office app, cmd, powershell or rundll32; command line has encoded or obfuscated content. [[procs-userpaths]] [[unsigned-procs]]',
+  'See who it is talking to. Put any unknown IP in the IP box. For Microsoft processes, you want Microsoft IPs. For an agent, you want the vendor that signed it or their cloud host. [[conn-owners]] [[ip-lookup]]',
+  'Check the file itself. Put the path in the File box. [[file-hash]] [[file-sig]]',
+  'Look for persistence. [[sched-tasks]] [[startup-items]] [[new-exes]]',
+  'Check logons and PowerShell history. [[failed-logons]] [[success-logons]] [[ps-history]]',
+  'Check Defender and your SIEM / EDR for alerts on this host. [[defender-status]]',
+  'If anything fails the checks, isolate the machine from the network (EDR isolation or unplug, do not power off) and escalate as a potential incident.'
+ ]},
+{id:'g-disk', title:'Disk full', sub:'Low disk space warnings, updates failing for space',
+ steps:[
+  'See how bad it is. [[disk-space]]',
+  'Clear temp files. [[clear-temp]]',
+  'Run Disk Cleanup: type cleanmgr, pick C:, click "Clean up system files" and tick Windows Update Cleanup.',
+  'Find what is big. [[big-folders]] [[big-files]]',
+  'OneDrive: right-click the OneDrive folder > "Free up space" to turn synced files back into online-only.',
+  'Old Outlook OST files for mailboxes no longer used can be deleted with Outlook closed. [[ost-folder]]',
+  'Empty the Recycle Bin and check Downloads. Ask before deleting anything personal.'
+ ]},
+{id:'g-bsod', title:'Blue screens / random restarts', sub:'Crashes, unexpected shutdowns',
+ steps:[
+  'Get the history: when, how often, which stop code. [[bsod-history]] [[reboot-history]]',
+  'The same stop code every time usually means one driver. Different codes each time points to hardware (RAM, disk, overheating).',
+  'Check for device and driver problems, and update display, network, dock and chipset drivers from the manufacturer. [[problem-devices]] [[drivers]]',
+  'Check the disk and repair system files. [[disk-health]] [[sfc-dism]]',
+  'Test RAM: run mdsched.exe and choose restart now.',
+  'Event 41 with no bugcheck = power lost. Check the power supply, battery or overheating (fans, vents).',
+  'Did it start after an update? [[hotfixes]]'
+ ]},
+{id:'g-audio', title:'No sound / microphone not working', sub:'Speakers, headset or mic issues',
+ steps:[
+  'Click the speaker icon in the taskbar and check the correct output device is selected and not muted.',
+  'Check the device is seen and working. [[audio-devices]]',
+  'Restart the audio service. [[audio-restart]]',
+  'For the mic: Settings > Privacy & security > Microphone, allow access for apps and desktop apps.',
+  'In Teams/Zoom check the app\'s own device settings: they can differ from Windows.',
+  'USB headset: try another port (avoid unpowered hubs). Bluetooth: remove and re-pair.',
+  'Run the Windows audio troubleshooter, then update or reinstall the audio driver. [[problem-devices]]'
+ ]},
+{id:'g-display', title:'Second monitor / display problems', sub:'Screen not detected, wrong resolution, flickering',
+ steps:[
+  'Check cables and the input source on the monitor itself. Try a different cable or port.',
+  'Press Windows + P and pick Extend. Windows + Ctrl + Shift + B restarts the graphics driver and fixes a lot of glitches.',
+  'Settings > System > Display > "Detect". Check the monitor shows up. [[monitors]]',
+  'Using a dock: unplug the dock power for 30 seconds, reconnect, and update the dock firmware and driver.',
+  'Update the display driver from the laptop manufacturer. [[drivers]] [[problem-devices]]',
+  'Blurry text: set each screen to its recommended resolution and scaling.'
+ ]},
+{id:'g-updates', title:'Windows Update failing', sub:'Stuck downloading, error codes, keeps failing',
+ steps:[
+  'Reboot first and check nothing is pending. [[pending-reboot]]',
+  'Check free space: updates need 10 GB or more. [[disk-space]]',
+  'Note the error code in Settings > Windows Update > Update history and search it.',
+  'Reset Windows Update components, reboot, try again. [[wu-reset]] [[wu-open]]',
+  'Repair system files. [[sfc-dism]]',
+  'If a specific update fails repeatedly, download it from the Microsoft Update Catalog and install manually.'
+ ]},
+{id:'g-drive', title:'Mapped drive missing / can\'t reach shared folder', sub:'Drive letter gone, red X, access denied',
+ steps:[
+  'Are they on the office network or VPN? Drive maps need line of sight to the server.',
+  'List what is mapped (run as the user, not elevated). [[mapped-drives]]',
+  'Can the file server be reached on port 445? [[test-port]]',
+  'Pull the latest drive maps from Group Policy. [[gpupdate]]',
+  '"Access denied": check the user\'s group memberships compared with a colleague who has access. [[whoami]] [[ad-groups]]',
+  'Map it manually if needed. [[map-drive]]',
+  'Stale saved credentials for the server can block access. [[cred-list]]'
+ ]},
+{id:'g-onedrive', title:'OneDrive not syncing', sub:'Red X, stuck processing, files not appearing',
+ steps:[
+  'Click the OneDrive cloud icon and read the error. Common ones: file name has invalid characters, path too long, file open in another app, storage full.',
+  'Check the user is signed in to the right account (Settings > Account).',
+  'Pause sync and resume it.',
+  'Reset OneDrive. [[onedrive-reset]]',
+  'Check free disk space. [[disk-space]]',
+  'Keeps asking to sign in: [[office-creds]] [[dsreg]]'
+ ]},
+{id:'g-vpn-connect', title:'AWS VPN: will not connect', sub:'Stuck connecting, drops out, connects but nothing works',
+ steps:[
+  'Get the version first. A surprising number of VPN faults are just an old client. [[vpn-version-win]] [[vpn-version-mac]]',
+  'Is it only this user? If the whole team is off, it is the endpoint or AWS side, not the laptop.',
+  'Check plain internet works first, without the VPN. Guest, hotel and mobile hotspot networks often block the UDP 443 the tunnel uses, which looks exactly like a broken client. Put the endpoint name in the Computer box. [[vpn-connect-check]]',
+  'Read the OpenVPN log. It names the real failure: TLS handshake, auth, expired certificate, no route. [[vpn-logs-win]] [[vpn-logs-mac]]',
+  'Look for another VPN or OpenVPN process holding the adapter. [[vpn-conflicts-win]] [[vpn-conflicts-mac]]',
+  'Windows: check the TAP adapter exists and is enabled. "No TAP-Windows adapters" means a reinstall. [[vpn-tap-win]]',
+  'Mac: check the helper daemon is loaded, and allow any location or network prompt sitting behind the window. The client hangs on an unanswered prompt. [[vpn-helper-mac]]',
+  'SSO sign-in window opens and nothing happens: something else is on the local callback port. [[vpn-saml-port]]',
+  'Connects but internal names do not resolve: check the pushed routes and DNS. [[vpn-routes-win]] [[mac-network]]',
+  'Still broken? Back the profiles up and do a clean wipe and reinstall. [[vpn-clean-reinstall-win]] [[vpn-clean-reinstall-mac]]',
+  'If the log shows a certificate or CRL error, the profile or certificate is the problem, not the machine. Get a fresh .ovpn from whoever runs the endpoint.'
+ ]},
+{id:'g-vpn-update', title:'AWS VPN: update and profile problems', sub:'Won\'t update, profiles vanished, .ovpn greyed out, not admin',
+ steps:[
+  'Back the profiles up before touching anything. Profiles live in the user folder, not in the app. [[vpn-profiles-win]] [[vpn-profiles-mac]]',
+  'Check the installed version against the current one on the AWS Client VPN download page. [[vpn-version-win]] [[vpn-version-mac]]',
+  'Profiles missing after the update: this is expected going to version 6.0, which changed where profiles are kept. Re-import the .ovpn, or restore from the backup you just took.',
+  'Updating needs admin on both platforms. On a managed machine the update may be pushed by MDM instead, so check before installing by hand. [[mac-mdm]]',
+  'The .ovpn file is greyed out when adding a profile: hidden .txt extension, wrong owner, or a quarantine flag. [[vpn-ovpn-fix-mac]]',
+  'It says the user is not an admin but never asks for credentials: grant admin briefly, delete or add the profile, then remove it again. [[vpn-admin-temp-mac]] [[macad-admin-toggle]]',
+  'If the update fails or the app is left half-installed, wipe it completely and install fresh. [[vpn-clean-reinstall-win]] [[vpn-clean-reinstall-mac]]',
+  'After any reinstall: open the client, answer the location and network prompts, import the profile, then test before handing back.'
+ ]},
+{id:'g-mac-slow', title:'Mac is slow', sub:'Beachball, fans, apps taking ages',
+ steps:[
+  'Start with the snapshot: model, macOS version, uptime and free space in one go. [[mac-snapshot]]',
+  'Check free space. Under about 10% free and macOS starts struggling. [[mac-storage]]',
+  'Find what is using the machine. On Intel Macs a high kernel_task usually means heat throttling, not a fault. [[mac-top]]',
+  'Look at login items in System Settings, General, Login Items, and quit anything not needed.',
+  'Check for crashes, which often point at one misbehaving app. [[mac-app-crash]]',
+  'Check the battery and whether it is in Low Power Mode. [[mac-battery]]',
+  'Check for pending updates. [[mac-updates]]',
+  'Restart. Macs are left running for weeks far more often than PCs, and it clears a lot.',
+  'Still slow? Check the disk. [[mac-disk-health]]'
+ ]},
+{id:'g-mac-home-wifi', title:'Mac: Wi-Fi joins at home but nothing loads', sub:'Office DNS left behind, works on site, dead everywhere else',
+ steps:[
+  'Confirm the shape of it: Wi-Fi shows connected with a good signal, the router IP pings, but no website or app works. That is DNS, not Wi-Fi.',
+  'If you are logged in as the user, switch to an admin account first or every sudo command will just refuse. [[mac-su-admin]]',
+  'Look at what DNS is actually set. A domain controller address (10.x or 192.168.x belonging to the office) on a home network means every lookup goes nowhere. [[mac-network]]',
+  'Set DNS and search domains back to Empty so the home router handles it, then flush. [[mac-dns-home]]',
+  'If they use a dock, clear every service, not just Wi-Fi. The old DNS usually sits on the dock Ethernet adapter and comes straight back when they plug in. [[mac-dns-home-all]]',
+  'Test: ping the router, then a public name, then open a site. [[mac-port-test]]',
+  'Cannot get onto the network at all from the menu bar: join it from Terminal. [[mac-wifi-join]]',
+  'Remind them the VPN is what gets them to internal systems from home. Internal names will not resolve until it is connected.',
+  'When they are next on site or on the VPN and internal names fail, put the office DNS back. [[mac-dns-office]]',
+  'Better long-term fix: leave DNS on automatic and let the VPN push the office DNS, so the Mac works in both places without anyone touching it.'
+ ]},
+{id:'g-mac-network', title:'Mac network and Wi-Fi problems', sub:'No internet, drops out, dock Ethernet not working',
+ steps:[
+  'Get the full picture first: which service is in use, its IP, the router and the real DNS. 169.254.x.x means DHCP failed. [[mac-network]]',
+  'Watch out for docks. If the Mac is on a dock\'s Ethernet, settings must be changed on that adapter, not on Wi-Fi, and each dock model appears as its own service.',
+  'Check the Wi-Fi signal. Worse than about -70 dBm explains dropouts and poor call quality. [[mac-wifi]]',
+  'Bounce Wi-Fi and renew the lease, or join the network from Terminal. [[mac-wifi-reset]] [[mac-wifi-join]]',
+  'Names not resolving: flush the cache, then check what DNS it is actually asking. [[mac-dns-flush]] [[mac-dns-test]]',
+  'On a domain-joined Mac, DNS must be the domain controller only. A public resolver as a secondary causes intermittent AD failures. [[mac-dns-set]] [[mac-dns-office]]',
+  'Connected but nothing loads away from the office: office DNS has been left hard-coded. Set it back to automatic. [[mac-dns-home]] [[mac-dns-home-all]]',
+  'Test a specific host and port. [[mac-port-test]]',
+  'Check what is talking out, and look up anything unfamiliar. [[mac-connections]] [[mac-public-ip]]',
+  'Still stuck: System Settings, Network, remove the service and add it back, or delete the Wi-Fi network and rejoin.'
+ ]},
+{id:'g-mac-login', title:'Mac: red dot at login / domain account problems', sub:'Won\'t accept password, AD node unavailable, works on VPN only',
+ steps:[
+  'Run the full health check first. It covers DNS, the DC, the bind, the directory, cached credentials and FileVault in one pass. Put the DC in the Computer box and the domain in the Domain box. [[macad-vpn-domain-check]]',
+  'A red dot means the AD node is unreachable, so start with DNS and the DC, not with the account. [[mac-dns-test]] [[mac-network]]',
+  'DNS must point at the domain controller only, on whichever adapter is in use, with the domain as the search domain. Remove any public DNS. [[mac-dns-set]]',
+  'Check the bind itself. Empty output from dsconfigad means it is not bound. [[macad-bind-status]]',
+  'Check the computer account password is still in the System keychain. A missing entry (error -25300) breaks trust even when the bind looks fine. [[macad-keychain-trust]]',
+  'Can the Mac see the directory right now? [[macad-node-test]]',
+  'If it only works on the network or VPN, the cached credentials are missing. Check with sudo, or you will get a false negative. [[macad-user-record]]',
+  'Missing cached credentials: recreate the mobile account, and enter a local admin at the SecureToken prompt rather than leaving it blank. [[macad-mobile-account]]',
+  'Password accepted at the desktop but not after a restart: they are not a FileVault unlock user. [[macad-filevault]] [[macad-securetoken]]',
+  'Trust still broken: rebind over the VPN with a domain admin. [[macad-rebind]]',
+  'Test properly before handing back: disconnect the VPN, restart, and log in cold.',
+  'Check the clock too. Skew breaks Kerberos with very misleading errors. [[mac-time]]'
+ ]},
+{id:'g-mac-app', title:'Mac: app won\'t open or is "damaged"', sub:'Gatekeeper blocks it, crashes on launch, needs a clean reinstall',
+ steps:[
+  '"App is damaged and can\'t be opened" almost always means the quarantine flag, not actual damage. Check the signature before clearing it. [[mac-app-quarantine]]',
+  '"Cannot be opened because the developer cannot be verified": right-click the app and choose Open, or System Settings, Privacy & Security, Open Anyway.',
+  'Crashes on launch: read the crash report, which names the app version and the reason. [[mac-app-crash]]',
+  'Check whether MDM manages the app. A managed app will reinstall or re-enforce itself whatever you do locally. [[mac-mdm]]',
+  'App needs permissions it does not have: System Settings, Privacy & Security, then Files and Folders, Full Disk Access, Screen Recording or Microphone as appropriate.',
+  'Nothing else worked: remove the app with all its preferences, caches and receipts, then install fresh. Put its name in the App box. [[mac-app-wipe]]',
+  'Finder or the Dock itself misbehaving rather than the app: [[mac-restart-ui]]'
+ ]},
+{id:'g-mac-print', title:'Mac printing problems', sub:'Nothing prints, printer paused, jobs stuck',
+ steps:[
+  'Check the printer is on, has paper and toner and is on the network.',
+  'List the printers and the queue. A paused printer is the most common cause and the script re-enables it. [[mac-printers]]',
+  'Can the Mac reach the printer or print server? Put its name or IP in the Computer box, and use port 9100 or 631. [[mac-port-test]]',
+  'Remove and re-add the printer in System Settings, Printers and Scanners. Prefer the AirPrint or IPP driver over a vendor one where you can.',
+  'Nothing works and it is worth starting clean: reset the whole printing system, then add the printers back. [[mac-printer-reset]]',
+  'On a domain network, check the print server is reachable and the user has rights to that queue.'
+ ]},
+{id:'g-mac-storage', title:'Mac disk full', sub:'Startup disk almost full, updates won\'t install',
+ steps:[
+  'See how bad it is and what is using it. [[mac-storage]]',
+  'System Settings, General, Storage has the built-in tools: Review Files, Empty Trash Automatically, and the per-category breakdown.',
+  'Empty the Trash properly, and check for a second Trash on any external drive.',
+  'Big offenders: Downloads, an old iOS backup in ~/Library/Application Support/MobileSync, Mail downloads, Photos library duplicates, Xcode caches, and Time Machine local snapshots. [[mac-storage]]',
+  'iCloud Drive or OneDrive holding full local copies: turn on Optimise Mac Storage or Files On-Demand.',
+  'Old user profiles from previous owners in /Users can be several hundred GB. Check with the user before removing any.',
+  'Delete unused apps properly, not just the .app. [[mac-app-wipe]]'
+ ]},
+{id:'g-mac-prompts', title:'Mac: constant password prompts', sub:'Keychain nags, Wi-Fi asks every time, Office keeps asking',
+ steps:[
+  'Usually the login keychain still holds the old password after a reset. Try Keychain Access, right-click the login keychain, Change Password first. [[macad-keychain-fix]]',
+  'On a domain Mac, check the account still has cached credentials and the machine still trusts the domain. [[macad-user-record]] [[macad-bind-status]]',
+  'Wi-Fi asking every time: remove the network from the preferred list and rejoin, then tick Remember. [[mac-wifi]]',
+  'Office or Teams prompting endlessly: sign out in the app, then remove its keychain entries and sign in again.',
+  'Check the clock. Skew makes SSO tokens invalid and produces repeated prompts. [[mac-time]]',
+  'Last resort is resetting the login keychain, which loses every saved password. Warn the user first. [[macad-keychain-fix]]'
+ ]},
+{id:'g-newuser', title:'Remote support session checklist', sub:'A good routine for every remote job',
+ steps:[
+  'Confirm who you are speaking to and the machine name. Put the machine name in the Computer box at the top.',
+  'Check it is online and who is logged on. [[remote-ping]] [[remote-user]]',
+  'Grab a quick snapshot without disturbing the user. [[remote-snapshot]] [[remote-disk]]',
+  'Connect: Quick Assist (user presses Ctrl + Windows + Q and gives you the code) or Remote Assistance. [[msra]]',
+  'Ask before closing anything, and warn before restarts. [[remote-restart]]',
+  'Log what you did in the ticket. The Notes tab in this toolkit is a scratchpad for that.'
+ ]}
+];
+
+/* ============================================================
+   RUN-BOX SHORTCUTS  (Windows + R)
+   ============================================================ */
+const RUNS = [
+ ['devmgmt.msc','Device Manager'],['services.msc','Services'],['eventvwr.msc','Event Viewer'],['compmgmt.msc','Computer Management (disks, users, shares)'],
+ ['taskschd.msc','Task Scheduler'],['lusrmgr.msc','Local users and groups'],['printmanagement.msc','Print Management'],['diskmgmt.msc','Disk Management'],
+ ['perfmon /rel','Reliability Monitor (crash timeline)'],['resmon','Resource Monitor'],['msinfo32','System Information'],['winver','Windows version'],
+ ['appwiz.cpl','Programs and Features'],['ncpa.cpl','Network adapters'],['sysdm.cpl','System properties (name, domain, remote)'],['control printers','Devices and Printers'],
+ ['mmsys.cpl','Sound devices'],['desk.cpl','Display settings'],['powercfg.cpl','Power options'],['inetcpl.cpl','Internet options (proxy)'],
+ ['firewall.cpl','Windows Firewall'],['wf.msc','Firewall advanced rules'],['control keymgr.dll','Credential Manager'],['certmgr.msc','User certificates'],
+ ['gpedit.msc','Local Group Policy'],['rsop.msc','Resultant policy'],['dsa.msc','AD Users and Computers (RSAT)'],['mstsc','Remote Desktop client'],
+ ['msra','Remote Assistance'],['cleanmgr','Disk Cleanup'],['mdsched','Memory diagnostic'],['%temp%','User temp folder'],
+ ['shell:startup','User startup folder'],['ms-settings:windowsupdate','Windows Update'],['ms-settings:apps-volume','App volume and device preferences'],['control /name Microsoft.Troubleshooting','Troubleshooters']
+];
+
+/* ============================================================
+   APP
+   ============================================================ */
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('ittk_' + k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('ittk_' + k, JSON.stringify(v)); } catch(e){} }
+};
+let vars = Object.assign({}, DEFAULTS, store.get('vars', {}));
+let favs = new Set(store.get('favs', []));
+let view = store.get('view', 'guides');
+let query = '';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fill = code => code.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
+const BADGE = {mac:['macOS','b-mac'], sudo:['Needs sudo','b-sudo'], admin:['Run as admin','b-admin'], changes:['Makes changes','b-changes'], remote:['Remote','b-remote'], rsat:['Needs RSAT','b-rsat'], net:['Internet','b-net'], cmd:['CMD / PS','b-cmd']};
+
+function renderCode(code){
+  return code.split('\n').map(line => {
+    let h = esc(line).replace(/\{\{(\w+)\}\}/g, (m,k) => '<span class="v" title="Fill-in: ' + k + '">' + esc(k in vars ? vars[k] : m) + '</span>');
+    return /^\s*#/.test(line) ? '<span class="c">' + h + '</span>' : h;
+  }).join('\n');
+}
+
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1500); }
+
+function copyText(text, btn){
+  const done = () => { if (btn){ const o = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done'); setTimeout(() => { btn.textContent = o; btn.classList.remove('done'); }, 1200); } toast('Copied to clipboard'); };
+  const fallback = () => { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch(e){ toast('Copy failed, select the text manually'); } ta.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+}
+
+function download(name, text){
+  const blob = new Blob(['\ufeff' + text.replace(/\n/g, '\r\n')], {type:'text/plain'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function scriptCard(s){
+  const cat = CATS.find(c => c.id === s.cat);
+  const badges = s.badges.map(b => '<span class="badge ' + BADGE[b][1] + '">' + BADGE[b][0] + '</span>').join('');
+  return '<div class="card" id="s-' + s.id + '">' +
+    '<div class="card-head"><div><div class="card-cat">' + esc(cat ? cat.name : '') + '</div><div class="card-title">' + esc(s.title) + '</div></div><div class="badges">' + badges + '</div></div>' +
+    '<div class="card-desc">' + s.desc + '</div>' +
+    '<div class="codewrap"><pre>' + renderCode(s.code) + '</pre></div>' +
+    '<div class="card-actions">' +
+      '<button class="btn primary" data-copy="' + s.id + '">Copy</button>' +
+      '<button class="btn" data-dl="' + s.id + '">Download .' + (s.badges.includes('mac') ? 'sh' : 'ps1') + '</button>' +
+      '<button class="star' + (favs.has(s.id) ? ' on' : '') + '" data-fav="' + s.id + '" title="Favourite">' + (favs.has(s.id) ? '★' : '☆') + '</button>' +
+    '</div></div>';
+}
+
+function guideCard(g, open){
+  const steps = g.steps.map(st => {
+    const html = esc(st).replace(/\[\[([\w-]+)\]\]/g, (m, id) => {
+      const s = SCRIPTS.find(x => x.id === id);
+      return s ? '<span class="chip" data-goto="' + id + '" title="Show script">' + esc(s.title.replace(/\s*\(uses \w+\)/, '')) + '</span>' : '';
+    });
+    return '<li>' + html + '</li>';
+  }).join('');
+  return '<details class="guide" id="g-' + g.id + '"' + (open ? ' open' : '') + '><summary><div><div class="gt">' + esc(g.title) + '</div><div class="gs">' + esc(g.sub) + '</div></div><span class="chev">&#9656;</span></summary><ol>' + steps + '</ol></details>';
+}
+
+function legend(){
+  return '<div class="legend">' + Object.values(BADGE).map(b => '<span class="badge ' + b[1] + '">' + b[0] + '</span>').join('') + '</div>';
+}
+
+function renderNav(){
+  const n = (id, label, count) => '<button data-view="' + id + '" class="' + (view === id && !query ? 'active' : '') + '"><span>' + label + '</span>' + (count !== undefined ? '<span class="count">' + count + '</span>' : '') + '</button>';
+  let h = '<h4>Start here</h4>' + n('guides', 'Fix-it guides', GUIDES.length) + n('favs', 'Favourites', favs.size) + n('all', 'All scripts', SCRIPTS.length);
+  h += '<h4>Script categories</h4>' + CATS.map(c => n(c.id, c.name, SCRIPTS.filter(s => s.cat === c.id).length)).join('');
+  h += '<h4>Other</h4>' + n('runs', 'Run-box shortcuts', RUNS.length) + n('notes', 'Ticket notes') + n('help', 'How to use');
+  $('#nav').innerHTML = h;
+}
+
+function renderMain(){
+  const m = $('#main');
+  if (query){
+    const q = query.toLowerCase(), words = q.split(/\s+/).filter(Boolean);
+    const hit = txt => words.every(w => txt.toLowerCase().includes(w));
+    const ss = SCRIPTS.filter(s => hit(s.title + ' ' + s.desc + ' ' + s.code + ' ' + s.cat));
+    const gg = GUIDES.filter(g => hit(g.title + ' ' + g.sub + ' ' + g.steps.join(' ')));
+    let h = '<div class="view-head"><div><h2>Results for "' + esc(query) + '"</h2><p>' + gg.length + ' guides, ' + ss.length + ' scripts</p></div></div>';
+    if (!ss.length && !gg.length) h += '<div class="empty">Nothing found. Try a shorter word like "print", "teams", "ip" or "lock".</div>';
+    if (gg.length) h += '<div class="section-label">Guides</div>' + gg.map(g => guideCard(g, gg.length <= 2)).join('');
+    if (ss.length) h += '<div class="section-label">Scripts</div>' + ss.map(scriptCard).join('');
+    m.innerHTML = h; return;
+  }
+  if (view === 'guides'){
+    m.innerHTML = '<div class="view-head"><div><h2>Fix-it guides</h2><p>Step-by-step for common problems. Blue chips jump to the matching script.</p></div></div>' + GUIDES.map(g => guideCard(g, false)).join('');
+  } else if (view === 'favs'){
+    const list = SCRIPTS.filter(s => favs.has(s.id));
+    m.innerHTML = '<div class="view-head"><div><h2>Favourites</h2><p>Click the star on any script to pin it here.</p></div>' + legend() + '</div>' + (list.length ? list.map(scriptCard).join('') : '<div class="empty">No favourites yet. Star the scripts you use most.</div>');
+  } else if (view === 'all'){
+    m.innerHTML = '<div class="view-head"><div><h2>All scripts</h2><p>Yellow text comes from the fill-in boxes at the top.</p></div>' + legend() + '</div>' + CATS.map(c => '<div class="section-label">' + esc(c.name) + '</div>' + SCRIPTS.filter(s => s.cat === c.id).map(scriptCard).join('')).join('');
+  } else if (view === 'runs'){
+    m.innerHTML = '<div class="view-head"><div><h2>Run-box shortcuts</h2><p>Press Windows + R, type the command, press Enter. Click a row to copy it.</p></div></div>' +
+      '<table class="runs"><thead><tr><th>Command</th><th>Opens</th></tr></thead><tbody>' + RUNS.map(r => '<tr data-copytext="' + esc(r[0]) + '" style="cursor:pointer"><td class="cmd">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('') + '</tbody></table>';
+  } else if (view === 'notes'){
+    m.innerHTML = '<div class="view-head"><div><h2>Ticket notes</h2><p>Scratchpad for the job in hand. Saved in this browser only.</p></div></div>' +
+      '<div class="notes-box"><div class="notes-row"><button class="btn" id="nStamp">Add timestamp</button><button class="btn" id="nInfo">Add machine / user</button><button class="btn primary" id="nCopy">Copy all</button><button class="btn" id="nClear">Clear</button></div>' +
+      '<textarea id="notes" placeholder="What was reported, what you checked, what you changed, outcome...">' + esc(store.get('notes', '')) + '</textarea></div>';
+    const ta = $('#notes');
+    const ins = t => { const p = ta.selectionStart; ta.value = ta.value.slice(0, p) + t + ta.value.slice(p); ta.focus(); ta.selectionStart = ta.selectionEnd = p + t.length; store.set('notes', ta.value); };
+    ta.addEventListener('input', () => store.set('notes', ta.value));
+    $('#nStamp').onclick = () => ins((ta.value && !ta.value.endsWith('\n') ? '\n' : '') + '[' + new Date().toLocaleString('en-GB') + '] ');
+    $('#nInfo').onclick = () => ins('Machine: ' + vars.COMPUTER + '   User: ' + vars.USER + '\n');
+    $('#nCopy').onclick = e => copyText(ta.value, e.target);
+    $('#nClear').onclick = () => { if (confirm('Clear all notes?')) { ta.value = ''; store.set('notes', ''); } };
+  } else if (view === 'help'){
+    m.innerHTML = '<div class="view-head"><div><h2>How to use</h2></div></div><div class="card"><div class="card-desc" style="padding:16px;color:var(--text)">' +
+      '<p><b>Running it.</b> This is a single HTML file. Double-click it, or put it on a shared drive and open it from there (e.g. \\\\server\\it\\toolkit.html). No install, no internet needed except for scripts marked Internet.</p>' +
+      '<p><b>Fill-ins.</b> Type a machine name, IP, username, process, app or file path in the boxes at the top. Every script updates live (the yellow bits) and Copy gives you the filled-in version. They are remembered next time.</p>' +
+      '<p><b>Windows or Mac.</b> Anything with a <span class="badge b-mac">macOS</span> badge is a Terminal command for a Mac, and downloads as a .sh file. Everything else is PowerShell for Windows. <span class="badge b-sudo">Needs sudo</span> means it will ask for an admin password on the Mac.</p><p><b>Running scripts.</b> Click Copy, then paste into PowerShell (or Terminal for the macOS ones) (right-click pastes in the classic console). For scripts marked <span class="badge b-admin">Run as admin</span>, open PowerShell with right-click > Run as administrator. <span class="badge b-changes">Makes changes</span> means it changes the machine, so read it first. Everything else only reads information.</p>' +
+      '<p><b>Download .ps1.</b> Saves the filled-in script as a file. If Windows blocks it from running, use: powershell -ExecutionPolicy Bypass -File .\\script.ps1 (or just paste it instead).</p>' +
+      '<p><b>Search.</b> Press / anywhere to jump to search. It looks through titles, descriptions and the code itself.</p>' +
+      '<p><b>Adding your own.</b> Open this file in Notepad, find a line starting with S(\' and copy it. Keep the code between String.raw` and the closing `); and avoid using the backtick character inside your PowerShell.</p>' +
+      '<p><b>Shared drive note.</b> Favourites and notes are saved per person, per browser, so each tech keeps their own.</p></div></div>';
+  } else {
+    const c = CATS.find(x => x.id === view) || CATS[0];
+    m.innerHTML = '<div class="view-head"><div><h2>' + esc(c.name) + '</h2><p>Yellow text comes from the fill-in boxes at the top.</p></div>' + legend() + '</div>' + SCRIPTS.filter(s => s.cat === c.id).map(scriptCard).join('');
+  }
+}
+
+function render(){ renderNav(); renderMain(); }
+
+function gotoScript(id){
+  const s = SCRIPTS.find(x => x.id === id); if (!s) return;
+  query = ''; $('#q').value = ''; view = s.cat; store.set('view', view); render();
+  const el = document.getElementById('s-' + id);
+  if (el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1700); }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-view],[data-copy],[data-dl],[data-fav],[data-goto],[data-copytext]');
+  if (!t) return;
+  if (t.dataset.view){ view = t.dataset.view; query = ''; $('#q').value = ''; store.set('view', view); render(); window.scrollTo(0,0); }
+  else if (t.dataset.copy){ copyText(fill(SCRIPTS.find(s => s.id === t.dataset.copy).code), t); }
+  else if (t.dataset.dl){ const s = SCRIPTS.find(x => x.id === t.dataset.dl); const mac = s.badges.includes('mac'); download(s.id + (mac ? '.sh' : '.ps1'), (mac && !/^#!/.test(s.code) ? '#!/bin/bash\n' : '') + '# ' + s.title + '\n' + fill(s.code) + '\n'); }
+  else if (t.dataset.fav){ const id = t.dataset.fav; favs.has(id) ? favs.delete(id) : favs.add(id); store.set('favs', [...favs]); const y = window.scrollY; render(); window.scrollTo(0, y); }
+  else if (t.dataset.goto){ e.preventDefault(); gotoScript(t.dataset.goto); }
+  else if (t.dataset.copytext){ copyText(t.dataset.copytext); }
+});
+
+document.querySelectorAll('.varbar input').forEach(inp => {
+  inp.value = vars[inp.dataset.var];
+  inp.addEventListener('input', () => {
+    vars[inp.dataset.var] = inp.value || DEFAULTS[inp.dataset.var];
+    store.set('vars', vars);
+    document.querySelectorAll('.card[id^="s-"]').forEach(card => {
+      const s = SCRIPTS.find(x => 's-' + x.id === card.id);
+      if (s) card.querySelector('pre').innerHTML = renderCode(s.code);
+    });
+  });
+});
+
+$('#q').addEventListener('input', e => { query = e.target.value.trim(); render(); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){ e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Escape' && document.activeElement === $('#q')){ $('#q').value = ''; query = ''; render(); }
+});
+
+const savedTheme = store.get('theme', null);
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+$('#themeBtn').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next); store.set('theme', next);
+};
+
+const setHH = () => document.documentElement.style.setProperty('--hh', document.querySelector('header').offsetHeight + 'px');
+setHH(); window.addEventListener('resize', setHH);
+render();
+</script>
+</body>
+</html>
