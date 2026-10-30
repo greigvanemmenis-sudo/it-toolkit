@@ -96,6 +96,7 @@ main{padding:26px 32px 80px;min-width:0;max-width:1080px;width:100%}
 .b-mac{background:#e8e8ed;color:#3a3a45;border:1px solid #c9c9d2}
 :root[data-theme="dark"] .b-mac,:root:not([data-theme="light"]) .b-mac{background:#2b2f3a;color:#c9d2de;border-color:#3b4250}
 .b-sudo{background:var(--warn-soft);color:var(--warn)}
+.b-linux{background:var(--panel2);color:var(--text);border:1px solid var(--line2)}
 
 .codewrap{position:relative;margin:0 18px;background:var(--code-bg);border:1px solid var(--code-line);border-radius:10px;overflow:hidden}
 .codewrap::before{content:"";display:block;height:28px;border-bottom:1px solid var(--code-line);background:radial-gradient(circle at 16px 14px,#ff5f57 4.5px,transparent 5px),radial-gradient(circle at 32px 14px,#febc2e 4.5px,transparent 5px),radial-gradient(circle at 48px 14px,#28c840 4.5px,transparent 5px);opacity:.75}
@@ -197,7 +198,7 @@ table.runs{width:100%;border-collapse:separate;border-spacing:0;background:var(-
    Everything lives in this one file. To add a script, copy one
    of the S(...) lines below and change the text.
    Fill-ins: {{COMPUTER}} {{IP}} {{USER}} {{PROCESS}} {{APP}} {{FILE}}
-   Badges: admin, changes, remote, rsat, net, cmd
+   Badges: admin, changes, remote, rsat, net, cmd, mac, sudo, linux
    ============================================================ */
 
 const DEFAULTS = {COMPUTER:'PC-NAME', IP:'8.8.8.8', USER:'jsmith', PROCESS:'wermgr', APP:'Chrome', DOMAIN:'corp.example.com', FILE:'C:\\Users\\Public\\Downloads\\file.exe'};
@@ -216,7 +217,8 @@ const CATS = [
   {id:'logs',     name:'Event logs'},
   {id:'vpn',      name:'AWS VPN Client'},
   {id:'mac',      name:'macOS'},
-  {id:'macad',    name:'macOS accounts & domain'}
+  {id:'macad',    name:'macOS accounts & domain'},
+  {id:'linux',    name:'Linux'}
 ];
 
 const SCRIPTS = [];
@@ -1769,6 +1771,658 @@ sysadminctl -secureTokenStatus {{USER}} 2>&1
 fdesetup status
 sudo fdesetup list 2>/dev/null | grep -i {{USER}} || echo "{{USER}} is NOT a FileVault unlock user"`);
 
+/* ---------------- LINUX ---------------- */
+/* Getting around */
+S('lx-nav','linux','Move around & list files',['linux'],
+'The basics of finding your way. ls -la shows hidden dot-files and permissions - use it whenever you land somewhere new. cd with no argument goes home; cd - jumps back to where you were.',
+String.raw`
+pwd                      # where am I?
+ls -la                   # long list, include hidden files
+ls -lah --sort=time      # human sizes, newest first (-r to reverse)
+ls -ld /some/dir         # the directory itself, not its contents
+cd /etc ; cd .. ; cd ~ ; cd -   # go to, up one, home, back
+tree -a -L 2             # directory tree, 2 levels deep (apt install tree)
+`);
+
+S('lx-read','linux','Read files (cat, less, head, tail)',['linux'],
+'Ways to look inside a file. less is for anything long (q to quit, / to search, G for the end). tail -f follows a file as it grows - ideal for watching a log while someone reproduces a problem.',
+String.raw`
+cat file.txt             # print it all
+cat -n file.txt          # with line numbers
+less file.txt            # page through (/word to search, n next, q quit)
+head -n 20 file.txt      # first 20 lines
+tail -n 50 file.txt      # last 50 lines
+tail -f /var/log/syslog  # follow live (Ctrl-C to stop)
+file mystery.bin         # what kind of file is this really?
+strings mystery.bin | less   # readable text inside a binary
+xxd file.bin | head      # hex dump
+`);
+
+S('lx-files','linux','Create, copy, move & delete',['linux','changes'],
+'Everyday file handling. rm has no recycle bin - what you delete is gone. -i asks before each overwrite or delete; -r works on directories.',
+String.raw`
+touch notes.txt               # create empty file (or update its timestamp)
+mkdir -p work/{logs,backup}   # make nested directories in one go
+cp file.txt backup.txt        # copy
+cp -r dir/ dir-copy/          # copy a directory
+cp -a src/ dst/               # copy keeping permissions, owners, times
+mv old.txt new.txt            # rename / move
+rm -i file.txt                # delete, asking first
+rm -r dir/                    # delete a directory and everything in it
+rmdir emptydir                # delete an empty directory only
+`);
+
+S('lx-links','linux','Links (ln)',['linux','changes'],
+'A symbolic link is a shortcut that points to a path; a hard link is a second name for the same file data. ls -l shows where a symlink points. A broken symlink is a common cause of "file not found" when the file looks like it is there.',
+String.raw`
+ln -s /opt/tool/bin/tool ~/bin/tool   # symbolic link (shortcut)
+ln original.txt hardlink.txt          # hard link (same inode)
+ls -l ~/bin/tool                      # shows  tool -> /opt/tool/bin/tool
+readlink -f ~/bin/tool                # resolve the final real path
+find . -xtype l                       # find broken symlinks
+ls -li                                # -i shows inode numbers (hard links share one)
+`);
+
+S('lx-globs','linux','Wildcards & brace expansion',['linux'],
+'The shell expands these before the command runs. Test a pattern with echo or ls first before using it with rm.',
+String.raw`
+ls *.txt            # any .txt file
+ls file?.log        # ? = exactly one character
+ls report[0-9].pdf  # one character from a set
+ls -d .*            # hidden files only
+echo {a,b,c}.txt    # -> a.txt b.txt c.txt
+echo {1..10}        # -> 1 2 3 ... 10
+cp config{,.bak}    # quick backup: cp config config.bak
+`);
+
+/* Finding things */
+S('lx-find','linux','Find files (find)',['linux'],
+'The most useful search tool on Linux. Search by name, type, size, age, owner or permission. 2>/dev/null hides the permission-denied noise when you search as a normal user.',
+String.raw`
+find / -name "*.conf" 2>/dev/null           # by name
+find / -iname "*backup*" 2>/dev/null        # case-insensitive
+find /home -type f -name "*.txt"            # files only (-type d = dirs)
+find / -size +100M 2>/dev/null              # bigger than 100 MB
+find /var/log -mmin -10                     # changed in last 10 minutes
+find / -mtime -1 -type f 2>/dev/null        # changed in last day
+find / -user {{USER}} 2>/dev/null           # owned by a user
+find /srv -type f ! -perm -o=r              # files others cannot read
+find . -name "*.bak" -exec ls -l {} \;      # run a command on each result
+`);
+
+S('lx-which','linux','Locate commands (which, whereis, type)',['linux'],
+'Where does a command actually live, and is it a binary, an alias or a shell builtin? Handy when the wrong version of something runs. locate is very fast but uses a database that updatedb refreshes.',
+String.raw`
+which python3        # path of the command that will run
+which -a python3     # every match on PATH
+whereis nginx        # binary, source and man page locations
+type ll              # alias, builtin, function or file?
+command -v curl      # portable "does this exist?" check
+locate nginx.conf    # fast name search (sudo updatedb to refresh)
+`);
+
+S('lx-grep','linux','Search inside files (grep)',['linux'],
+'Find text in files or in another command output. -r searches a whole tree, -i ignores case, -n shows line numbers, -v shows lines that do NOT match, -E enables extended regex.',
+String.raw`
+grep "error" app.log                  # lines containing error
+grep -i "timeout" /etc/nginx/nginx.conf   # ignore case
+grep -rn "db_host" /var/www/ 2>/dev/null  # recursive with line numbers
+grep -rl "TODO" .                     # just the file names
+grep -v "^#" /etc/ssh/sshd_config | grep -v "^$"   # strip comments and blanks
+grep -E "error|warn|fail" app.log     # several patterns
+grep -A2 -B2 "Failed" /var/log/auth.log   # 2 lines of context after/before
+grep -c "404" access.log              # count matches
+grep -oE "[0-9]{1,3}(\.[0-9]{1,3}){3}" access.log | sort -u   # pull out IPs
+`);
+
+/* Text processing */
+S('lx-text-basic','linux','Slice & count text (cut, sort, uniq, wc)',['linux'],
+'Small tools that chain together. Classic pattern: cut a column, sort it, uniq -c to count, sort -nr to rank. Great for log analysis.',
+String.raw`
+cut -d: -f1 /etc/passwd               # field 1, colon-separated
+cut -c1-10 file                       # characters 1-10
+sort file ; sort -u file              # sort ; sort and de-duplicate
+sort -n numbers ; sort -nr numbers    # numeric ; numeric descending
+sort -t, -k3 data.csv                 # sort by column 3 of a CSV
+uniq -c                               # count adjacent duplicates (sort first)
+wc -l file                            # count lines
+# top 10 client IPs in a web log:
+cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head
+`);
+
+S('lx-awk','linux','awk basics',['linux'],
+'awk splits each line into fields ($1, $2 ... $NF = last) and lets you filter and print them. -F sets the separator. Handles columns separated by any amount of whitespace, which cut cannot.',
+String.raw`
+awk '{print $1}' file                         # first column
+awk -F: '{print $1, $7}' /etc/passwd          # user and shell
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd   # real (non-system) users
+awk '$9 == 500 {print $7}' access.log         # URLs that returned 500
+awk '{print $NF}' file                        # last field
+awk '{sum += $5} END {print sum}' file        # add up a column
+awk 'NR==5' file                              # print line 5
+`);
+
+S('lx-sed','linux','sed basics',['linux'],
+'Stream editor: find-and-replace and line editing without opening the file. Without -i it only prints the result; -i edits the file in place (use -i.bak to keep a backup).',
+String.raw`
+sed 's/old/new/' file          # replace first match on each line
+sed 's/old/new/g' file         # replace all matches
+sed -i.bak 's/old/new/g' file  # edit in place, keep file.bak
+sed -n '10,20p' file           # print lines 10-20 only
+sed '/^#/d' file               # delete comment lines
+sed '/^$/d' file               # delete blank lines
+sed 's/^/PREFIX /' file        # add text to the start of every line
+`);
+
+S('lx-text-more','linux','tr, column, diff & comm',['linux'],
+'More text helpers. tr swaps or deletes characters, column lines output up into a table, diff and comm compare files - handy for spotting what changed in a config.',
+String.raw`
+tr 'a-z' 'A-Z' < file          # upper-case
+tr -d '\r' < win.txt > unix.txt   # strip Windows line endings
+tr -s ' ' < file               # squeeze repeated spaces
+column -t -s: /etc/passwd      # neat table from colon-separated data
+diff old.conf new.conf         # line differences
+diff -u old.conf new.conf      # unified (patch-style) diff
+comm -13 <(sort old) <(sort new)   # lines only in new
+`);
+
+S('lx-pipes','linux','Pipes, redirection & tee',['linux'],
+'How commands are wired together. | feeds output into the next command; > overwrites a file, >> appends; 2> is the error stream; tee writes to a file AND the screen.',
+String.raw`
+cmd > out.txt          # stdout to file (overwrite)
+cmd >> out.txt         # append
+cmd 2> errors.txt      # stderr to file
+cmd 2>/dev/null        # throw errors away
+cmd > all.txt 2>&1     # stdout and stderr together
+cmd < input.txt        # read input from a file
+cmd1 | cmd2            # pipe output into the next command
+cmd | tee out.txt      # see it and save it (tee -a to append)
+cmd1 && cmd2           # run cmd2 only if cmd1 succeeded
+cmd1 || cmd2           # run cmd2 only if cmd1 failed
+`);
+
+S('lx-xargs','linux','Run a command per line (xargs, while read)',['linux'],
+'Turn a list into arguments. xargs is fast; a while-read loop is clearer when each line needs several steps. -P runs jobs in parallel.',
+String.raw`
+cat servers.txt | xargs -I{} ping -c1 {}         # one command per line
+find . -name "*.tmp" -print0 | xargs -0 rm       # safe with spaces in names
+cat urls.txt | xargs -P 5 -I{} curl -s -o /dev/null -w "%{http_code} {}\n" {}
+while read -r host; do
+  echo "== $host"; host "$host"
+done < servers.txt
+`);
+
+/* Permissions & ownership */
+S('lx-perms-read','linux','Read permissions (ls -l explained)',['linux'],
+'-rwxr-x--- breaks into: type (- file, d dir, l link), then owner / group / others, each r (read) w (write) x (execute). Numbers: r=4 w=2 x=1, so rwx=7, r-x=5, r--=4. On a directory, x means you may enter it.',
+String.raw`
+ls -l file
+# -rwxr-x---  1 alice devs  1234 Oct 30 10:00 file
+#  |  |  |       |     |
+#  |  |  others  owner group
+#  |  group (r-x = 5)
+#  owner (rwx = 7)          -> mode 750
+stat file              # full details, incl. numeric mode and times
+stat -c '%a %U:%G %n' *   # numeric mode, owner:group, name
+`);
+
+S('lx-chmod','linux','Change permissions (chmod)',['linux','changes'],
+'Set permissions by number or by symbol. Common modes: 644 for normal files, 755 for scripts and dirs, 600 for private keys (ssh refuses keys that are readable by others).',
+String.raw`
+chmod 644 file          # rw-r--r--
+chmod 755 script.sh     # rwxr-xr-x
+chmod 600 id_ed25519    # rw------- (required for SSH keys)
+chmod +x script.sh      # add execute for everyone
+chmod u+x,g-w,o-r file  # user add x, group remove w, others remove r
+chmod -R 750 dir/       # recursive
+`);
+
+S('lx-chown','linux','Change owner & group (chown, chgrp)',['linux','sudo','changes'],
+'Change who owns a file. Usually needs sudo. user:group sets both at once. Wrong ownership is a common cause of "permission denied" after copying files in as root.',
+String.raw`
+sudo chown {{USER}} file             # change owner
+sudo chown {{USER}}:{{USER}} file     # owner and group
+sudo chgrp www-data file             # group only
+sudo chown -R {{USER}}: /opt/app     # recursive; "user:" = user and their main group
+`);
+
+S('lx-umask','linux','Default permissions (umask)',['linux'],
+'umask removes permissions from new files and dirs. 022 means new files come out 644 and dirs 755; 077 makes everything private (600 / 700).',
+String.raw`
+umask            # show current mask, e.g. 0022
+umask -S         # show it symbolically
+umask 077        # this shell: new files private to you
+`);
+
+S('lx-special-bits','linux','Special bits: setuid, setgid, sticky',['linux'],
+'setuid (s in the owner x slot) runs a program as its OWNER - that is how passwd can update a root-owned file. setgid runs as the group, or on a shared dir makes new files inherit the group. Sticky (t, as on /tmp) means only a file owner can delete it. An unexpected root-owned setuid file is worth investigating.',
+String.raw`
+ls -l /usr/bin/passwd       # -rwsr-xr-x  <- s = setuid
+ls -ld /tmp                 # drwxrwxrwt  <- t = sticky
+find / -perm -4000 -type f 2>/dev/null   # all setuid files
+find / -perm -2000 -type f 2>/dev/null   # all setgid files
+chmod g+s /srv/shared       # shared folder: new files keep the group
+chmod +t /srv/dropbox       # only owners can delete their own files
+`);
+
+S('lx-acl','linux','Access control lists (getfacl, setfacl)',['linux','changes'],
+'Extra per-user or per-group permissions beyond owner/group/others. A + at the end of the ls -l mode (rwxr-x---+) means an ACL is set - easy to miss when someone can or cannot get into a folder.',
+String.raw`
+getfacl file                         # show ACLs
+setfacl -m u:{{USER}}:rw file         # give one user read/write
+setfacl -m g:devs:rx dir             # give a group read/execute
+setfacl -x u:{{USER}} file            # remove that entry
+setfacl -b file                      # remove all ACLs
+`);
+
+/* Users & groups */
+S('lx-whoami','linux','Who am I & who is here',['linux'],
+'Which account you are on, which groups you are in, and who else is logged in. sudo -l shows what you are allowed to run as admin.',
+String.raw`
+whoami ; id              # user, uid, gid, groups
+groups                   # just the groups
+who ; w                  # who is logged in, and what they are doing
+last -n 20               # recent logins
+lastlog                  # last login per account
+sudo -l                  # what am I allowed to run with sudo?
+`);
+
+S('lx-account-files','linux','Account files: passwd, shadow, group',['linux'],
+'/etc/passwd lists accounts (readable by all). /etc/shadow holds the password hashes and ageing (root only). /etc/group lists group members. getent also checks LDAP/AD if the machine is domain-joined.',
+String.raw`
+cat /etc/passwd
+# name:x:uid:gid:comment:home:shell   (x = hash is in shadow)
+grep -v -E "nologin|false" /etc/passwd   # accounts with a real shell
+awk -F: '$3 == 0' /etc/passwd             # every uid-0 (root) account - should be just root
+sudo grep {{USER}} /etc/shadow            # is the account locked? (! or * before the hash)
+grep -E "sudo|wheel|adm" /etc/group       # who has admin rights
+getent passwd {{USER}}                     # also checks LDAP/AD if joined
+`);
+
+S('lx-useradd','linux','Add & change users and groups',['linux','sudo','changes'],
+'Manage local accounts. On Debian/Ubuntu adduser is the friendly interactive version; useradd is the low-level one. usermod -aG adds to a group - forgetting -a REPLACES all the user groups.',
+String.raw`
+sudo adduser {{USER}}                    # interactive create
+sudo useradd -m -s /bin/bash {{USER}}    # create with home dir and bash
+sudo passwd {{USER}}                     # set / reset password
+sudo usermod -aG sudo {{USER}}           # add to a group (-a is vital)
+sudo usermod -L {{USER}} ; sudo usermod -U {{USER}}   # lock / unlock
+sudo groupadd devs                       # new group
+sudo gpasswd -d {{USER}} devs            # remove from a group
+sudo userdel -r {{USER}}                 # delete user and home dir
+sudo chage -l {{USER}}                   # password ageing / expiry
+`);
+
+S('lx-sudo','linux','sudo & su',['linux','sudo'],
+'sudo runs one command as root (or another user) using YOUR password, if /etc/sudoers allows it. su switches user using THEIR password. Always edit sudoers with visudo - a typo there can lock everyone out of admin.',
+String.raw`
+sudo command             # run one command as root
+sudo -u {{USER}} command  # run as another user
+sudo -i                  # root login shell
+sudo -l                  # list what you may run
+su - {{USER}}            # switch user (needs their password)
+sudo visudo              # edit /etc/sudoers safely
+sudo ls /etc/sudoers.d/  # extra sudo rules live here
+`);
+
+/* Processes & jobs */
+S('lx-ps','linux','See running processes (ps, top, pgrep)',['linux'],
+'What is running, as whom, and what is eating CPU or memory. Put a process name in the Process box to search for it.',
+String.raw`
+ps aux                     # every process, all users
+ps aux --sort=-%mem | head # biggest memory users
+ps aux --sort=-%cpu | head # biggest CPU users
+ps -ef --forest            # parent/child tree
+pgrep -a {{PROCESS}}       # find by name, show command line
+pstree -p                  # tree with PIDs
+top                        # live view (q quit, M sort mem, P sort CPU)
+htop                       # friendlier live view
+`);
+
+S('lx-kill','linux','Signals & kill',['linux','changes'],
+'Stop processes. Plain kill sends TERM (please exit cleanly); -9 sends KILL (cannot be ignored, no clean-up). Try TERM first.',
+String.raw`
+kill 1234              # polite stop (SIGTERM)
+kill -9 1234           # force kill (SIGKILL)
+kill -HUP 1234         # many daemons reload config on HUP
+pkill -f {{PROCESS}}   # kill by matching the command line
+killall {{PROCESS}}    # kill all by exact name
+kill -l                # list all signals
+`);
+
+S('lx-jobs','linux','Background jobs (&, jobs, fg, bg, nohup)',['linux'],
+'Keep long tasks running while you keep working. Ctrl-Z pauses the foreground job, bg resumes it in the background. nohup or tmux keeps a job alive after you log out.',
+String.raw`
+long_task > task.log 2>&1 &   # start in the background
+jobs -l                       # list this shell jobs
+fg %1                         # bring job 1 to the foreground
+# Ctrl-Z  pauses the current job, then:
+bg %1                         # resume it in the background
+nohup long_task > task.log 2>&1 &   # survives logout
+disown -h %1                  # detach an already running job
+`);
+
+S('lx-lsof','linux','Open files & ports per process (lsof, fuser)',['linux','sudo'],
+'Which process has a file or port open. Answers "port already in use" and "cannot unmount, device is busy". Run with sudo to see other users processes.',
+String.raw`
+sudo lsof -i               # all network connections
+sudo lsof -i :80           # who is using port 80
+sudo lsof -u {{USER}}       # everything a user has open
+sudo lsof /var/log/syslog  # who has this file open
+sudo lsof +L1              # deleted files still holding disk space
+sudo fuser -vm /mnt/usb    # what is keeping a mount busy
+`);
+
+/* Services & scheduling */
+S('lx-systemctl','linux','Services (systemctl)',['linux','sudo','changes'],
+'Start, stop and inspect services on systemd systems (Ubuntu, Debian, RHEL, Fedora). enable makes a service start at boot; start runs it now - they are separate.',
+String.raw`
+systemctl status ssh                  # is it running? recent log lines
+sudo systemctl start ssh              # start now
+sudo systemctl stop ssh               # stop now
+sudo systemctl restart ssh            # restart
+sudo systemctl enable --now ssh       # start at boot AND now
+sudo systemctl disable ssh            # do not start at boot
+systemctl --failed                    # anything that failed to start
+systemctl list-units --type=service --state=running
+systemctl list-timers                 # scheduled systemd timers
+systemctl cat ssh                     # show the unit file
+`);
+
+S('lx-journalctl','linux','System logs (journalctl)',['linux'],
+'Read the systemd journal. -u filters to one service, -f follows live, -p err shows errors only. Add sudo to see everything.',
+String.raw`
+journalctl -u ssh                    # one service
+journalctl -u ssh -f                 # follow live
+journalctl -b                        # since last boot
+journalctl -b -1 -p err              # errors from the PREVIOUS boot (why did it crash?)
+journalctl --since "1 hour ago"      # time window
+journalctl -k                        # kernel messages (like dmesg)
+journalctl --disk-usage              # how much space the journal uses
+`);
+
+S('lx-cron','linux','Scheduled tasks (cron)',['linux'],
+'cron runs commands on a schedule. Five fields: minute hour day-of-month month day-of-week. If a nightly job "did not run", check here and in the logs.',
+String.raw`
+crontab -l                       # my cron jobs
+crontab -e                       # edit my cron jobs
+sudo crontab -l -u {{USER}}      # another user jobs
+cat /etc/crontab
+ls -la /etc/cron.d /etc/cron.{hourly,daily,weekly,monthly}
+# m  h  dom mon dow  command
+# */5 *  *   *   *   /opt/backup.sh    every 5 minutes
+# 0   2  *   *   1   /opt/report.sh    02:00 every Monday
+# @reboot            /opt/start.sh     at boot
+grep CRON /var/log/syslog | tail     # did it run?
+`);
+
+S('lx-at','linux','One-off scheduled jobs (at)',['linux','changes'],
+'Run something once at a set time - a reboot out of hours, for example. Needs the atd service (apt install at).',
+String.raw`
+echo "sudo reboot" | at 23:00     # run once at 23:00
+at now + 30 minutes < job.sh      # run a script in 30 minutes
+atq                               # list queued jobs
+atrm 3                            # remove job 3
+`);
+
+/* Networking */
+S('lx-ip','linux','Interfaces & routes (ip)',['linux'],
+'Addresses, interfaces and routes. Start here for "no network" on a Linux machine: is the interface up, does it have an address, is there a default route? ifconfig and route are the older equivalents.',
+String.raw`
+ip a                       # all addresses (short for ip addr)
+ip -br a                   # one line per interface
+ip a show eth0             # one interface
+ip r                       # routing table (default gateway)
+ip neigh                   # ARP cache: other hosts seen on the LAN
+sudo ip link set eth0 up   # bring an interface up/down
+nmcli device status        # NetworkManager view (desktops)
+ifconfig ; route -n ; arp -a     # older tools, same info
+`);
+
+S('lx-ss','linux','Listening ports & connections (ss, netstat)',['linux'],
+'What is listening and what is connected. A service bound to 127.0.0.1 only accepts local connections - a common reason it works on the server but not from a PC. -p needs sudo to show other users processes.',
+String.raw`
+ss -tulpn          # TCP/UDP listening ports with process
+ss -tan            # all TCP connections
+ss -tn state established
+ss -tlnp | grep 127.0.0.1    # local-only services
+netstat -tulpn     # older equivalent (net-tools)
+`);
+
+S('lx-dns-hosts','linux','DNS & name resolution',['linux'],
+'/etc/hosts overrides DNS (needs sudo to edit). /etc/resolv.conf shows which DNS servers the box uses. dig and getent show what a name resolves to.',
+String.raw`
+cat /etc/hosts
+cat /etc/resolv.conf               # DNS servers in use
+resolvectl status                  # on systemd-resolved systems
+getent hosts {{DOMAIN}}            # resolve the way the system does
+dig {{DOMAIN}} +short              # ask DNS directly
+dig @1.1.1.1 {{DOMAIN}} +short     # ask a specific DNS server
+sudo resolvectl flush-caches       # clear the local DNS cache
+`);
+
+S('lx-ping','linux','Reachability (ping, traceroute, mtr)',['linux'],
+'Is it up and how do I get there? Many hosts block ICMP, so no ping reply does not mean the host is down.',
+String.raw`
+ping -c 4 {{IP}}               # 4 pings then stop
+traceroute {{IP}}              # path, hop by hop
+tracepath {{IP}}               # no root needed
+mtr -rw {{IP}}                 # combined ping + traceroute report
+nc -zv {{COMPUTER}} 443        # is a specific port reachable?
+`);
+
+S('lx-curl','linux','HTTP from the command line (curl, wget)',['linux','net'],
+'Talk to web servers directly. curl -I shows headers only, -v shows the whole conversation including TLS. wget is best for downloading files.',
+String.raw`
+curl https://{{DOMAIN}}                     # fetch a page
+curl -I https://{{DOMAIN}}                  # headers only
+curl -v https://{{DOMAIN}}                  # full request/response detail
+curl -L https://{{DOMAIN}}                  # follow redirects
+curl -o page.html https://{{DOMAIN}}        # save to a file
+curl -s -o /dev/null -w "%{http_code}\n" https://{{DOMAIN}}   # just the status code
+curl -w "dns %{time_namelookup}s  total %{time_total}s\n" -o /dev/null -s https://{{DOMAIN}}   # timings
+wget https://{{DOMAIN}}/file.zip            # download
+`);
+
+S('lx-nc','linux','netcat basics (nc)',['linux'],
+'Quick network checks: is a port open, does a service answer, can two machines talk on a given port at all? Flags differ between nc builds (traditional vs openbsd) - check nc -h.',
+String.raw`
+nc -zv {{COMPUTER}} 22 80 443      # are these ports open?
+nc -zv {{COMPUTER}} 8000-8010      # small port range
+nc {{COMPUTER}} 25                 # talk to a mail server by hand (QUIT to exit)
+# Firewall test between two machines:
+nc -lvnp 5000                      # on the server: listen on 5000
+nc -zv SERVER-IP 5000              # on the client: can I reach it?
+`);
+
+S('lx-firewall','linux','Local firewall (ufw, firewalld, nftables)',['linux','sudo'],
+'View the host firewall. Often the reason a service is running but cannot be reached from other machines.',
+String.raw`
+sudo ufw status verbose                 # Ubuntu ufw
+sudo firewall-cmd --list-all            # RHEL/Fedora firewalld
+sudo nft list ruleset                   # nftables (modern default)
+sudo iptables -L -n -v --line-numbers   # legacy iptables rules
+# Allow a port (makes changes):
+sudo ufw allow 443/tcp
+sudo firewall-cmd --add-service=https --permanent && sudo firewall-cmd --reload
+`);
+
+/* SSH & file transfer */
+S('lx-ssh','linux','SSH keys & config',['linux','changes'],
+'Log in with keys instead of passwords. The private key stays on your machine (chmod 600); the public key goes in the server ~/.ssh/authorized_keys. ~/.ssh/config saves typing long options.',
+String.raw`
+ssh {{USER}}@{{COMPUTER}}                       # log in
+ssh -p 2222 -i ~/.ssh/work_key {{USER}}@{{COMPUTER}}
+ssh-keygen -t ed25519 -f ~/.ssh/work_key        # new key pair
+ssh-copy-id -i ~/.ssh/work_key.pub {{USER}}@{{COMPUTER}}   # install public key
+chmod 700 ~/.ssh ; chmod 600 ~/.ssh/work_key
+# ~/.ssh/config:
+# Host web1
+#   HostName {{COMPUTER}}
+#   User {{USER}}
+#   IdentityFile ~/.ssh/work_key
+ssh web1                                        # now this is enough
+`);
+
+S('lx-scp','linux','Copy files over SSH (scp, rsync)',['linux'],
+'Move files to and from a remote machine. rsync only sends what changed and can resume - better for big or repeated copies.',
+String.raw`
+scp file.txt {{USER}}@{{COMPUTER}}:/tmp/          # upload
+scp {{USER}}@{{COMPUTER}}:/var/log/syslog .       # download
+scp -r dir/ {{USER}}@{{COMPUTER}}:~/              # whole directory
+rsync -avz --progress dir/ {{USER}}@{{COMPUTER}}:~/dir/   # sync, show progress
+rsync -avz -e "ssh -p 2222" dir/ {{USER}}@{{COMPUTER}}:~/dir/   # custom port
+`);
+
+S('lx-ssh-tunnel','linux','SSH port forwarding (-L, -R, -D)',['linux'],
+'Reach a service that is only open inside a network, without opening firewall ports. -L brings a remote port to your machine (e.g. an admin page bound to 127.0.0.1 on the server). -R pushes one of your ports to the remote side. -D makes a SOCKS proxy. -N means no shell, just the tunnel.',
+String.raw`
+# Local: your localhost:8080 -> server 127.0.0.1:80
+ssh -N -L 8080:127.0.0.1:80 {{USER}}@{{COMPUTER}}
+# Local, via the server, to another internal host:
+ssh -N -L 3389:192.168.50.10:3389 {{USER}}@{{COMPUTER}}
+# Remote: server port 9000 -> your localhost:8000
+ssh -N -R 9000:127.0.0.1:8000 {{USER}}@{{COMPUTER}}
+# Dynamic SOCKS proxy on localhost:1080 (point the browser at it):
+ssh -N -D 1080 {{USER}}@{{COMPUTER}}
+`);
+
+S('lx-serve','linux','Serve files quickly (http.server)',['linux'],
+'Start a throwaway web server in the current directory so another machine on the network can download from it. Anyone who can reach the port can read every file in that directory - only use it on a trusted network and stop it (Ctrl-C) when done.',
+String.raw`
+python3 -m http.server 8000                    # serve current directory
+python3 -m http.server 8000 --bind 127.0.0.1   # this machine only
+# on the other machine:
+curl -O http://SERVER-IP:8000/file.zip
+`);
+
+/* System info & disks */
+S('lx-sysinfo','linux','What system is this?',['linux'],
+'Operating system, version, kernel and hardware. The first thing to check on an unfamiliar machine.',
+String.raw`
+uname -a                  # kernel, hostname, architecture
+cat /etc/os-release       # distribution and version
+hostnamectl               # hostname, OS, kernel, VM or not
+lscpu | head -15          # CPU
+free -h                   # memory
+uptime                    # how long up, load average
+systemd-detect-virt       # running in a VM or container?
+sudo dmidecode -s system-serial-number   # serial number
+`);
+
+S('lx-disks','linux','Disks & mounts (df, du, lsblk, mount)',['linux'],
+'Disk full is one of the commonest Linux problems. df shows free space per filesystem, du shows what is using it. df -i checks inodes - a disk can be "full" with space left if it runs out of inodes.',
+String.raw`
+df -h                      # free space, human sizes
+df -i                      # inode usage
+du -sh * | sort -h         # size of each item here
+sudo du -h --max-depth=1 / 2>/dev/null | sort -h   # biggest top-level dirs
+lsblk                      # block devices and partitions
+mount | column -t          # what is mounted where
+cat /etc/fstab             # mounts at boot
+sudo fdisk -l              # partition tables
+`);
+
+S('lx-env','linux','Environment variables & PATH',['linux'],
+'Variables the shell and programs use. PATH decides which binary runs when you type a name - "command not found" often just means its folder is not on PATH.',
+String.raw`
+env                         # all environment variables
+echo $PATH                  # where commands are looked up
+echo $HOME $SHELL $USER
+export APP_ENV=test         # set for this shell and its children
+export PATH=$PATH:~/bin     # add a directory to PATH
+unset APP_ENV               # remove it
+`);
+
+/* Packages & archives */
+S('lx-apt','linux','Packages (apt, dnf)',['linux','sudo','changes','net'],
+'Install and update software. apt for Debian/Ubuntu, dnf for RHEL/Fedora. apt update refreshes the list; apt upgrade installs the updates.',
+String.raw`
+sudo apt update                    # refresh package lists
+sudo apt upgrade                   # install all updates
+sudo apt install htop              # install a package
+sudo apt remove pkg                # remove (keep config)
+apt search htop                    # search
+apt show nginx                     # details and version
+dpkg -l | grep -i openssl          # installed version
+apt list --upgradable              # what has updates waiting
+# RHEL/Fedora: sudo dnf upgrade / sudo dnf install htop / rpm -qa
+`);
+
+S('lx-archives','linux','Archives (tar, gzip, zip, 7z)',['linux'],
+'Pack and unpack. tar letters: c create, x extract, t list, z gzip, j bzip2, J xz, v verbose, f file. List an archive (tvf) before extracting it so it cannot surprise you.',
+String.raw`
+tar -czvf backup.tar.gz dir/     # create .tar.gz
+tar -tzvf backup.tar.gz          # list contents
+tar -xzvf backup.tar.gz          # extract here
+tar -xzvf backup.tar.gz -C /tmp/out   # extract somewhere else
+gzip file ; gunzip file.gz       # single-file compress / decompress
+zip -r out.zip dir/ ; unzip -l out.zip ; unzip out.zip
+7z x archive.7z                  # extract 7-Zip (and most other formats)
+`);
+
+/* Logs */
+S('lx-logs','linux','Where the logs are (/var/log)',['linux'],
+'Classic text logs. auth.log (secure on RHEL) records logins and sudo use; syslog is the general system log; web server logs show every request. Reading many of these needs sudo or membership of the adm group.',
+String.raw`
+ls -la /var/log/
+sudo tail -f /var/log/syslog             # general system log (Debian/Ubuntu)
+sudo tail -f /var/log/messages           # same on RHEL/CentOS
+sudo grep "Failed password" /var/log/auth.log | tail   # failed logins
+sudo grep "Accepted" /var/log/auth.log   # successful logins
+tail -f /var/log/nginx/error.log         # web errors (apache: /var/log/apache2/)
+sudo zgrep "error" /var/log/syslog.*.gz  # search rotated, compressed logs
+dmesg -T | tail                          # kernel messages with times
+`);
+
+/* Shell productivity */
+S('lx-history','linux','Command history & shortcuts',['linux'],
+'Do not retype. Ctrl-R searches your history as you type. history also shows what was run on a box before a problem started.',
+String.raw`
+history | tail -20       # recent commands
+!!                       # repeat last command  (sudo !!  = again, as root)
+!$                       # last argument of the previous command
+!42                      # run history entry 42
+# Ctrl-R  search history   Ctrl-A / Ctrl-E  start / end of line
+# Ctrl-U  clear line       Ctrl-L  clear screen   Tab  complete
+`);
+
+S('lx-aliases','linux','Aliases & .bashrc',['linux','changes'],
+'Short names for long commands. Put them in ~/.bashrc (or ~/.zshrc if you use zsh) so they survive a new terminal, then source the file to load them now.',
+String.raw`
+alias ll='ls -lah'
+alias myip='ip -br a'
+alias ports='ss -tulpn'
+alias                      # list current aliases
+unalias ll                 # remove one
+echo "alias ll='ls -lah'" >> ~/.bashrc   # make permanent
+source ~/.bashrc           # reload now
+`);
+
+S('lx-help','linux','Getting help (man, --help, tldr)',['linux'],
+'You do not have to memorise flags. man has the full manual (/word to search, q to quit); --help is a quick summary; tldr gives practical examples.',
+String.raw`
+man find            # full manual
+man -k network      # search all manual pages by keyword
+rsync --help | less # quick summary of flags
+tldr tar            # example-driven cheat sheet (apt install tldr)
+help cd             # help for shell builtins
+`);
+
+S('lx-tmux','linux','Keep sessions alive (tmux)',['linux'],
+'Split the terminal and keep work running if your SSH connection drops - essential for long upgrades on a remote server. Everything starts with the prefix Ctrl-B, then a key.',
+String.raw`
+tmux new -s work         # new named session
+tmux ls                  # list sessions
+tmux attach -t work      # re-attach after a disconnect
+# Ctrl-B d   detach (session keeps running)
+# Ctrl-B %   split left/right     Ctrl-B "  split top/bottom
+# Ctrl-B arrow  move between panes
+# Ctrl-B c   new window           Ctrl-B n / p  next / previous window
+# Ctrl-B [   scroll mode (q to leave)
+tmux kill-session -t work
+`);
+
 /* ============================================================
    GUIDES   —   [[script-id]] becomes a clickable chip
    ============================================================ */
@@ -2050,6 +2704,18 @@ const GUIDES = [
   'Connect: Quick Assist (user presses Ctrl + Windows + Q and gives you the code) or Remote Assistance. [[msra]]',
   'Ask before closing anything, and warn before restarts. [[remote-restart]]',
   'Log what you did in the ticket. The Notes tab in this toolkit is a scratchpad for that.'
+ ]},
+{id:'g-linux', title:'Linux server first look', sub:'Logged on to an unfamiliar Linux machine - what to check, in order',
+ steps:[
+  'What is it? OS, version, uptime and whether it is a VM: [[lx-sysinfo]]. Check you are on the right box and which account you are using: [[lx-whoami]].',
+  'Is the disk full? This causes more Linux outages than anything else. [[lx-disks]] - and check inodes with df -i too.',
+  'Is it struggling? Look at load, CPU and memory hogs: [[lx-ps]].',
+  'Is the service running? [[lx-systemctl]] - systemctl --failed lists anything that did not start.',
+  'What do the logs say? [[lx-journalctl]] for the service, and [[lx-logs]] for the classic files under /var/log.',
+  'Can it be reached? Address and route: [[lx-ip]]. Is the service listening, and on which address: [[lx-ss]]. Is the local firewall blocking it: [[lx-firewall]].',
+  'Name problems? [[lx-dns-hosts]]. Test from outside with [[lx-ping]] and [[lx-nc]].',
+  'Doing anything long over SSH (upgrades, big copies)? Run it inside [[lx-tmux]] so a dropped connection does not kill it.',
+  'Log what you did in the ticket.'
  ]}
 ];
 
@@ -2083,7 +2749,7 @@ let query = '';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fill = code => code.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
-const BADGE = {mac:['macOS','b-mac'], sudo:['Needs sudo','b-sudo'], admin:['Run as admin','b-admin'], changes:['Makes changes','b-changes'], remote:['Remote','b-remote'], rsat:['Needs RSAT','b-rsat'], net:['Internet','b-net'], cmd:['CMD / PS','b-cmd']};
+const BADGE = {mac:['macOS','b-mac'], sudo:['Needs sudo','b-sudo'], admin:['Run as admin','b-admin'], changes:['Makes changes','b-changes'], remote:['Remote','b-remote'], rsat:['Needs RSAT','b-rsat'], net:['Internet','b-net'], cmd:['CMD / PS','b-cmd'], linux:['Linux','b-linux']};
 
 function renderCode(code){
   return code.split('\n').map(line => {
@@ -2100,8 +2766,12 @@ function copyText(text, btn){
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
 }
 
+const isSh = s => s.badges.includes('mac') || s.badges.includes('linux');
+
 function download(name, text){
-  const blob = new Blob(['\ufeff' + text.replace(/\n/g, '\r\n')], {type:'text/plain'});
+  // Shell scripts need plain LF endings and no BOM, or bash fails on the first line
+  const body = /\.sh$/.test(name) ? text : '\ufeff' + text.replace(/\n/g, '\r\n');
+  const blob = new Blob([body], {type:'text/plain'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
@@ -2115,7 +2785,7 @@ function scriptCard(s){
     '<div class="codewrap"><pre>' + renderCode(s.code) + '</pre></div>' +
     '<div class="card-actions">' +
       '<button class="btn primary" data-copy="' + s.id + '">Copy</button>' +
-      '<button class="btn" data-dl="' + s.id + '">Download .' + (s.badges.includes('mac') ? 'sh' : 'ps1') + '</button>' +
+      '<button class="btn" data-dl="' + s.id + '">Download .' + (isSh(s) ? 'sh' : 'ps1') + '</button>' +
       '<button class="star' + (favs.has(s.id) ? ' on' : '') + '" data-fav="' + s.id + '" title="Favourite">' + (favs.has(s.id) ? '★' : '☆') + '</button>' +
     '</div></div>';
 }
@@ -2181,7 +2851,7 @@ function renderMain(){
     m.innerHTML = '<div class="view-head"><div><h2>How to use</h2></div></div><div class="card"><div class="card-desc" style="padding:16px;color:var(--text)">' +
       '<p><b>Running it.</b> This is a single HTML file. Double-click it, or put it on a shared drive and open it from there (e.g. \\\\server\\it\\toolkit.html). No install, no internet needed except for scripts marked Internet.</p>' +
       '<p><b>Fill-ins.</b> Type a machine name, IP, username, process, app or file path in the boxes at the top. Every script updates live (the yellow bits) and Copy gives you the filled-in version. They are remembered next time.</p>' +
-      '<p><b>Windows or Mac.</b> Anything with a <span class="badge b-mac">macOS</span> badge is a Terminal command for a Mac, and downloads as a .sh file. Everything else is PowerShell for Windows. <span class="badge b-sudo">Needs sudo</span> means it will ask for an admin password on the Mac.</p><p><b>Running scripts.</b> Click Copy, then paste into PowerShell (or Terminal for the macOS ones) (right-click pastes in the classic console). For scripts marked <span class="badge b-admin">Run as admin</span>, open PowerShell with right-click > Run as administrator. <span class="badge b-changes">Makes changes</span> means it changes the machine, so read it first. Everything else only reads information.</p>' +
+      '<p><b>Windows, Mac or Linux.</b> Anything with a <span class="badge b-mac">macOS</span> badge is a Terminal command for a Mac, and anything with a <span class="badge b-linux">Linux</span> badge is a terminal command for a Linux machine. Both download as a .sh file. Everything else is PowerShell for Windows. <span class="badge b-sudo">Needs sudo</span> means it needs an admin password on the Mac or Linux machine.</p><p><b>Running scripts.</b> Click Copy, then paste into PowerShell (or Terminal for the macOS ones) (right-click pastes in the classic console). For scripts marked <span class="badge b-admin">Run as admin</span>, open PowerShell with right-click > Run as administrator. <span class="badge b-changes">Makes changes</span> means it changes the machine, so read it first. Everything else only reads information.</p>' +
       '<p><b>Download .ps1.</b> Saves the filled-in script as a file. If Windows blocks it from running, use: powershell -ExecutionPolicy Bypass -File .\\script.ps1 (or just paste it instead).</p>' +
       '<p><b>Search.</b> Press / anywhere to jump to search. It looks through titles, descriptions and the code itself.</p>' +
       '<p><b>Adding your own.</b> Open this file in Notepad, find a line starting with S(\' and copy it. Keep the code between String.raw` and the closing `); and avoid using the backtick character inside your PowerShell.</p>' +
@@ -2206,7 +2876,7 @@ document.addEventListener('click', e => {
   if (!t) return;
   if (t.dataset.view){ view = t.dataset.view; query = ''; $('#q').value = ''; store.set('view', view); render(); window.scrollTo(0,0); }
   else if (t.dataset.copy){ copyText(fill(SCRIPTS.find(s => s.id === t.dataset.copy).code), t); }
-  else if (t.dataset.dl){ const s = SCRIPTS.find(x => x.id === t.dataset.dl); const mac = s.badges.includes('mac'); download(s.id + (mac ? '.sh' : '.ps1'), (mac && !/^#!/.test(s.code) ? '#!/bin/bash\n' : '') + '# ' + s.title + '\n' + fill(s.code) + '\n'); }
+  else if (t.dataset.dl){ const s = SCRIPTS.find(x => x.id === t.dataset.dl); const sh = isSh(s); download(s.id + (sh ? '.sh' : '.ps1'), (sh && !/^#!/.test(s.code) ? '#!/bin/bash\n' : '') + '# ' + s.title + '\n' + fill(s.code) + '\n'); }
   else if (t.dataset.fav){ const id = t.dataset.fav; favs.has(id) ? favs.delete(id) : favs.add(id); store.set('favs', [...favs]); const y = window.scrollY; render(); window.scrollTo(0, y); }
   else if (t.dataset.goto){ e.preventDefault(); gotoScript(t.dataset.goto); }
   else if (t.dataset.copytext){ copyText(t.dataset.copytext); }
